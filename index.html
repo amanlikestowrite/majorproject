@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Nyaya Sahayak — Department of Justice, Ministry of Law &amp; Justice, Government of India</title>
+  <meta name="description" content="Official AI Virtual Assistant for the Department of Justice, Ministry of Law & Justice, Government of India. Guiding citizens through court procedures, case status, legal aid, and judicial services.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <a href="#chatbot" class="skipLink">Skip to Nyaya Sahayak Assistant</a>
+  <header class="header" role="banner">
+    <div class="topbar">
+      <div class="container topbarContent">
+        <div class="identity">
+          <span class="flag" aria-hidden="true"></span>
+          <span><strong>भारत सरकार</strong> | Government of India</span>
+          <span class="dotSep">&bull;</span>
+          <span><strong>विधि और न्याय मंत्रालय</strong> | Ministry of Law &amp; Justice</span>
+        </div>
+      </div>
+    </div>
+    <div class="navbar">
+      <div class="container navContent">
+        <a href="#home" class="brand" aria-label="Department of Justice Home">
+          <div class="seal" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="16" r="14.5" stroke="#142B4A" stroke-width="1.4"/>
+              <path d="M16 6V24" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M10 11H22" stroke="#142B4A" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="16" cy="11" r="1.5" fill="#DFA04B"/>
+              <path d="M10 11L7.5 17M10 11L12.5 17" stroke="#142B4A" stroke-width="0.8"/>
+              <path d="M6.5 17C6.5 18.5 13.5 18.5 13.5 17H6.5Z" fill="#142B4A" fill-opacity="0.85"/>
+              <path d="M22 11L19.5 17M22 11L24.5 17" stroke="#142B4A" stroke-width="0.8"/>
+              <path d="M18.5 17C18.5 18.5 25.5 18.5 25.5 17H18.5Z" fill="#142B4A" fill-opacity="0.85"/>
+              <path d="M12 25H20" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="brandText">
+            <span class="brandTitle">Department of Justice</span>
+            <span class="brandSubtitle">Ministry of Law &amp; Justice &bull; Government of India</span>
+          </div>
+        </a>
+        <div class="navRight">
+          <ul class="navLinks" id="navLinks" role="navigation" aria-label="Primary navigation">
+            <li><a href="#home" class="navLink active">Home</a></li>
+            <li><a href="#chatbot" class="navLink">Virtual Assistant</a></li>
+            <li><a href="#services" class="navLink">Services</a></li>
+            <li><a href="#about" class="navLink">About DoJ</a></li>
+          </ul>
+          <button type="button" class="menuToggle" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="patternStrip" aria-hidden="true"></div>
+  </header>
+  <section class="hero" id="home" aria-label="Introduction to Department of Justice Virtual Assistant">
+    <div class="container heroGrid">
+      <div class="heroContent">
+        <div class="eyebrow">
+          DEPARTMENT OF JUSTICE | GOVERNMENT OF INDIA
+        </div>
+        <h1 class="heroTitle">
+          Justice begins with the <em>right information.</em>
+        </h1>
+        <p class="heroText">
+          Your trusted digital assistant for understanding India's judicial system, navigating court procedures, and finding verified information from the Department of Justice.
+        </p>
+        <div class="searchBox">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="heroInput" 
+            class="searchInput" 
+            placeholder="What would you like to know about India's judicial system?"
+            aria-label="Search judicial information"
+          >
+          <button type="button" id="heroSearchBtn" class="searchBtn">
+            <span>Ask</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+        <div class="searchNote">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <span>Official Department of Justice virtual assistant. Reliable judicial guidance.</span>
+        </div>
+        <div class="actions">
+          <a href="#chatbot" id="startChatBtn" class="primaryBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Start a Conversation</span>
+          </a>
+          <a href="#services" id="exploreBtn" class="secondaryBtn">
+            <span>Explore Common Questions</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="illustrationPanel" aria-label="Architectural drawing of an Indian courthouse">
+        <img src="assets/illustrations/courthouse-hero.svg" alt="Line drawing of an Indian courthouse with classical columns, dome, and subtle radial motif" width="540" height="400">
+      </div>
+    </div>
+  </section>
+  <div class="container">
+    <div class="divider" aria-hidden="true">
+      <div class="dividerDiamond"></div>
+    </div>
+  </div>
+  <section class="servicesSection" id="services" aria-label="Service Discovery and Common Inquiries">
+    <div class="container">
+      <div class="sectionHeader">
+        <span class="sectionEyebrow">CITIZEN SERVICES</span>
+        <h2 class="sectionTitle">What can we help you with?</h2>
+        <p class="sectionSubtitle">Select a topic below to explore or ask your question in natural language.</p>
+      </div>
+      <div class="tilesGrid">
+        <article class="serviceTile" query="How do I check my case status?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <circle cx="11.5" cy="14.5" r="3"></circle>
+                <line x1="13.7" y1="16.7" x2="17" y2="20"></line>
+              </svg>
+            </div>
+            <span class="tileBadge">eCourts</span>
+          </div>
+          <h3 class="tileTitle">Know Your Case Status</h3>
+          <p class="tileDesc">Find information about the current status of ongoing court cases using CNR number or party names.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore Status &rarr;</span>
+          </div>
+        </article>
+        <article class="serviceTile" query="How can I file a case online?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <line x1="12" y1="18" x2="12" y2="12"></line>
+                <line x1="9" y1="15" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <span class="tileBadge">eFiling 3.0</span>
+          </div>
+          <h3 class="tileTitle">eFiling &amp; Online Court Fees</h3>
+          <p class="tileDesc">Understand electronic filing of cases and online payment of court fees without visiting physical counters.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore eFiling &rarr;</span>
+          </div>
+        </article>
+        <article class="serviceTile" query="How do I pay a traffic challan?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                <line x1="1" y1="10" x2="23" y2="10"></line>
+                <circle cx="17" cy="15" r="2"></circle>
+              </svg>
+            </div>
+            <span class="tileBadge">Virtual Courts</span>
+          </div>
+          <h3 class="tileTitle">Traffic Challans &amp; Virtual Courts</h3>
+          <p class="tileDesc">Learn how to contest or settle compoundable traffic violation notices online without courtroom presence.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore Challans &rarr;</span>
+          </div>
+        </article>
+        <article class="serviceTile" query="Where can I find information about judicial vacancies?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18"></path>
+                <path d="M5 21V7l7-4 7 4v14"></path>
+                <line x1="9" y1="11" x2="9" y2="17"></line>
+                <line x1="15" y1="11" x2="15" y2="17"></line>
+              </svg>
+            </div>
+            <span class="tileBadge">DoJ Appointments</span>
+          </div>
+          <h3 class="tileTitle">Judicial Vacancies &amp; Appointments</h3>
+          <p class="tileDesc">Explore official monthly vacancy statistics and appointment procedures for Supreme Court and High Courts.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore Vacancies &rarr;</span>
+          </div>
+        </article>
+        <article class="serviceTile" query="What is the National Judicial Data Grid?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+            </div>
+            <span class="tileBadge">NJDG Portal</span>
+          </div>
+          <h3 class="tileTitle">NJDG &amp; National Case Pendency</h3>
+          <p class="tileDesc">Access transparent national statistics on instituted, pending, and disposed cases across the country.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore Statistics &rarr;</span>
+          </div>
+        </article>
+        <article class="serviceTile" query="How can I watch live court proceedings?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+                <polygon points="10 8 15 10 10 12 10 8"></polygon>
+              </svg>
+            </div>
+            <span class="tileBadge">Open Justice</span>
+          </div>
+          <h3 class="tileTitle">Live Court Proceedings</h3>
+          <p class="tileDesc">Find information about official live streaming of Supreme Court Constitution Benches and High Courts.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore Broadcasts &rarr;</span>
+          </div>
+        </article>
+        <article class="serviceTile" query="How can I access free legal aid?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                <path d="M12 8v4M10 10h4"></path>
+              </svg>
+            </div>
+            <span class="tileBadge">NALSA &amp; DISHA</span>
+          </div>
+          <h3 class="tileTitle">Legal Aid &amp; Tele-Law Services</h3>
+          <p class="tileDesc">Discover how eligible citizens can access free statutory legal aid and pre-litigation advice via CSCs.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore Legal Aid &rarr;</span>
+          </div>
+        </article>
+        <article class="serviceTile" query="How do Fast Track Special Courts work?">
+          <div class="tileHeader">
+            <div class="tileIconWrap" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"></circle>
+                <polyline points="12 6 12 12 15 15"></polyline>
+              </svg>
+            </div>
+            <span class="tileBadge">FTSC Scheme</span>
+          </div>
+          <h3 class="tileTitle">Fast Track Special Courts (FTSCs)</h3>
+          <p class="tileDesc">Understand the dedicated functioning of 750+ special courts for expeditious resolution of POCSO cases.</p>
+          <div class="tileFooter">
+            <span class="tileAction">Explore FTSCs &rarr;</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+  <div class="container">
+    <div class="divider" aria-hidden="true">
+      <div class="dividerDiamond"></div>
+    </div>
+  </div>
+  <section class="chatSection" id="chatbot" aria-label="Nyaya Sahayak Virtual Assistant Chatbot">
+    <div class="container">
+      <div class="sectionHeader">
+        <span class="sectionEyebrow">CONVERSATIONAL ASSISTANT</span>
+        <h2 class="sectionTitle">Nyaya Sahayak Virtual Assistant</h2>
+        <p class="sectionSubtitle">Interactive digital assistant for judicial services and Department of Justice information.</p>
+      </div>
+      <div class="chatContainer">
+        <div class="chatHeader">
+          <div class="chatHeaderLeft">
+            <div class="chatAvatar" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="14.5" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M16 6V24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M10 11H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="16" cy="11" r="1.5" fill="#DFA04B"/>
+                <path d="M10 11L7.5 17M10 11L12.5 17" stroke="currentColor" stroke-width="0.8"/>
+                <path d="M6.5 17C6.5 18.5 13.5 18.5 13.5 17H6.5Z" fill="currentColor"/>
+                <path d="M22 11L19.5 17M22 11L24.5 17" stroke="currentColor" stroke-width="0.8"/>
+                <path d="M18.5 17C18.5 18.5 25.5 18.5 25.5 17H18.5Z" fill="currentColor"/>
+                <path d="M12 25H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="chatTitleGroup">
+              <span class="chatTitle">Nyaya Sahayak</span>
+              <span class="chatSubtitle">Department of Justice Virtual Assistant</span>
+            </div>
+            <span class="statusPill">
+              <span class="statusDot" aria-hidden="true"></span>
+              Active Service
+            </span>
+          </div>
+          <div class="chatActions">
+            <button type="button" class="chatBtn" id="newChatBtn" title="Start new conversation" aria-label="Start new conversation">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>New Conversation</span>
+            </button>
+          </div>
+        </div>
+        <div class="chatViewport" id="chatViewport" role="log" aria-live="polite">
+          <div class="emptyState" id="emptyState">
+            <span class="emptyBadge">Department of Justice</span>
+            <br>
+            <div class="emptyIcon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="14.5" stroke="#142B4A" stroke-width="1.5"/>
+                <path d="M16 7V23" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M10 12H22" stroke="#142B4A" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="16" cy="12" r="1.5" fill="#DFA04B"/>
+                <path d="M10 12L7.5 17.5M10 12L12.5 17.5" stroke="#142B4A" stroke-width="0.9"/>
+                <path d="M6.5 17.5C6.5 19 13.5 19 13.5 17.5H6.5Z" fill="#142B4A"/>
+                <path d="M22 12L19.5 17.5M22 12L24.5 17.5" stroke="#142B4A" stroke-width="0.9"/>
+                <path d="M18.5 17.5C18.5 19 25.5 19 25.5 17.5H18.5Z" fill="#142B4A"/>
+                <path d="M12 24H20" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="emptyHeading">Namaste! How can I assist you today?</h3>
+            <p class="emptyDesc">I can help you find information about judicial services, court procedures and Department of Justice initiatives.</p>
+            <div class="suggestedHeader">
+              <span class="suggestedTitle">Suggested Questions</span>
+            </div>
+            <div class="suggestedGrid">
+              <button type="button" class="suggestedBtn" query="How can I check my case status?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>How can I check my case status?</span>
+              </button>
+              <button type="button" class="suggestedBtn" query="How do I pay a traffic challan?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                <span>How do I pay a traffic challan?</span>
+              </button>
+              <button type="button" class="suggestedBtn" query="How can I file a case online?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                <span>How can I file a case online?</span>
+              </button>
+              <button type="button" class="suggestedBtn" query="What is the eCourts Services mobile application?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                <span>What is the eCourts Services mobile application?</span>
+              </button>
+              <button type="button" class="suggestedBtn" query="How can I access free legal aid?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>How can I access free legal aid?</span>
+              </button>
+              <button type="button" class="suggestedBtn" query="How do Fast Track Special Courts work?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 6 12 12 15 15"></polyline></svg>
+                <span>How do Fast Track Special Courts work?</span>
+              </button>
+              <button type="button" class="suggestedBtn" query="Where can I find information about judicial vacancies?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path></svg>
+                <span>Where can I find information about judicial vacancies?</span>
+              </button>
+              <button type="button" class="suggestedBtn" query="How can I access Tele-Law services?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <span>How can I access Tele-Law services?</span>
+              </button>
+            </div>
+          </div>
+          <div class="chatStream" id="chatStream" style="display: none;"></div>
+          <div class="typingRow" id="typingIndicator" style="display: none; margin: 10px 0 16px 0;" aria-hidden="true">
+            <div class="typingDot"></div>
+            <div class="typingDot"></div>
+            <div class="typingDot"></div>
+            <span class="typingLabel">Nyaya Sahayak is retrieving official judicial guidance...</span>
+          </div>
+        </div>
+        <div class="composer">
+          <form id="chatForm" class="composerForm" autocomplete="off">
+            <div class="inputShell">
+              <label for="chatInput" class="skipLink">Type your question here</label>
+              <textarea 
+                id="chatInput" 
+                class="composerTextarea" 
+                rows="1" 
+                placeholder="Type your question here..." 
+                maxlength="800"
+                required
+              ></textarea>
+              <div class="composerButtons">
+                <button type="button" class="micBtn" id="micBtn" title="Speak question" aria-label="Voice input">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                </button>
+                <button type="submit" class="sendBtn" id="sendBtn" aria-label="Send question">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="disclaimer">
+              Please avoid sharing sensitive personal information. Responses are for general informational purposes.
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="container">
+    <div class="divider" aria-hidden="true">
+      <div class="dividerDiamond"></div>
+    </div>
+  </div>
+  <section class="trustSection" id="about" aria-label="Institutional Trust and Accessibility Standards">
+    <div class="container">
+      <div class="sectionHeader">
+        <span class="sectionEyebrow">INSTITUTIONAL TRUST</span>
+        <h2 class="sectionTitle">Reliable information. Clear guidance.</h2>
+        <p class="sectionSubtitle">Designed to uphold the constitutional principle of equal access to justice under Article 39A.</p>
+      </div>
+      <div class="trustGrid">
+        <div class="trustCard">
+          <div class="trustIcon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <h3 class="trustTitle">Official Portals</h3>
+          <p class="trustDesc">All information links directly to verified government sources including eCourts, NALSA, NJDG, and Virtual Courts.</p>
+        </div>
+        <div class="trustCard">
+          <div class="trustIcon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+          <h3 class="trustTitle">Plain Explanations</h3>
+          <p class="trustDesc">Complex judicial procedures and legal terms are broken down into easy, numbered steps for everyday citizens.</p>
+        </div>
+        <div class="trustCard">
+          <div class="trustIcon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h3 class="trustTitle">Citizen Privacy</h3>
+          <p class="trustDesc">Conversations are completely confidential. No confidential case numbers or personal documents are stored.</p>
+        </div>
+        <div class="trustCard">
+          <div class="trustIcon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path>
+            </svg>
+          </div>
+          <h3 class="trustTitle">Accessible Design</h3>
+          <p class="trustDesc">Built adhering to GIGW 3.0 and WCAG 2.1 AA standards, supporting text resizing, screen readers, and speech interaction.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="patternStrip" aria-hidden="true"></div>
+  <section class="statsBand" aria-label="Official Judicial Data Highlights">
+    <div class="container">
+      <div class="statsGrid">
+        <div class="statCell">
+          <div class="statNum">34 / 34</div>
+          <div class="statLabel">Supreme Court Strength</div>
+          <div class="statSub">Full constitutional bench</div>
+        </div>
+        <div class="statCell">
+          <div class="statNum">25</div>
+          <div class="statLabel">High Courts of India</div>
+          <div class="statSub">State judicial jurisdictions</div>
+        </div>
+        <div class="statCell">
+          <div class="statNum">3,400+</div>
+          <div class="statLabel">Court Complexes</div>
+          <div class="statSub">eCourts Mission Mode Project</div>
+        </div>
+        <div class="statCell">
+          <div class="statNum">15100</div>
+          <div class="statLabel">NALSA 24×7 Legal Helpline</div>
+          <div class="statSub">Free statutory legal aid</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footerGrid">
+        <div class="footerCol">
+          <div class="footerTitle">Department of Justice</div>
+          <div class="footerSub">
+            Ministry of Law &amp; Justice, Government of India<br>
+            Jaisalmer House, 26, Man Singh Road, New Delhi &ndash; 110011.
+          </div>
+          <div class="footerDisclaimer">
+            <strong>Disclaimer:</strong> Nyaya Sahayak provides general informational guidance on judicial services and procedures. It does not provide legal representation or binding judicial orders.
+          </div>
+        </div>
+        <div class="footerCol">
+          <div class="footerTitle">Official Portals</div>
+          <ul class="footerLinks">
+            <li><a href="https://doj.gov.in" target="_blank" rel="noopener noreferrer">Department of Justice &nearr;</a></li>
+            <li><a href="https://services.ecourts.gov.in" target="_blank" rel="noopener noreferrer">eCourts Services &nearr;</a></li>
+            <li><a href="https://njdg.ecourts.gov.in" target="_blank" rel="noopener noreferrer">National Judicial Data Grid &nearr;</a></li>
+            <li><a href="https://tele-law.in" target="_blank" rel="noopener noreferrer">Tele-Law Portal &nearr;</a></li>
+            <li><a href="https://nalsa.gov.in" target="_blank" rel="noopener noreferrer">NALSA Legal Aid &nearr;</a></li>
+          </ul>
+        </div>
+        <div class="footerCol">
+          <div class="footerTitle">Quick Links</div>
+          <ul class="footerLinks">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#chatbot">Virtual Assistant</a></li>
+            <li><a href="#services">Citizen Services</a></li>
+            <li><a href="#about">About Department of Justice</a></li>
+            <li><a href="#services">Judicial Statistics</a></li>
+          </ul>
+        </div>
+        <div class="footerCol">
+          <div class="footerTitle">Resources</div>
+          <ul class="footerLinks">
+            <li><a href="https://main.sci.gov.in" target="_blank" rel="noopener noreferrer">Supreme Court of India &nearr;</a></li>
+            <li><a href="https://legislative.gov.in" target="_blank" rel="noopener noreferrer">Legislative Department &nearr;</a></li>
+            <li><a href="https://lawmin.gov.in" target="_blank" rel="noopener noreferrer">Ministry of Law &amp; Justice &nearr;</a></li>
+            <li><a href="https://india.gov.in" target="_blank" rel="noopener noreferrer">National Portal of India &nearr;</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footerBottom">
+        <div>
+          &copy; 2026 Department of Justice, Ministry of Law &amp; Justice, Government of India. All rights reserved.
+        </div>
+        <div class="policyLinks">
+          <a href="#">Website Policies</a>
+          <span>&bull;</span>
+          <a href="#">GIGW 3.0 Compliance</a>
+          <span>&bull;</span>
+          <a href="#">Hyperlinking Policy</a>
+          <span>&bull;</span>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="js/chatbot.js"></script>
+  <script src="js/interactions.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
