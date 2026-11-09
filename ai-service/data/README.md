@@ -8,7 +8,7 @@ This directory houses the authoritative, pre-processed Department of Justice (Do
 
 - **`knowledge_base/rag_chunks.jsonl`**: 229 verified and schema-validated chunks (224,450 `cl100k_base` BPE tokens) across all 17 official PDFs and 16 JSON datasets. Each line is an independent JSON object with 20 schema fields.
 - **`knowledge_base/rag_chunks.json`**: Master JSON representation containing metadata and the full array of 229 chunks.
-- **`knowledge_base/sample_chunks.json`**: Representative golden benchmark chunks across the 8 core DoJ domains used for evaluation and unit testing.
+- **`knowledge_base/sample_chunks.json`**: Exactly 8 representative golden benchmark chunks (stored under the root `samples` array across 6 schema metadata keys) covering all core DoJ domains, used for evaluation and unit testing.
 - **`knowledge_base/master_metadata_index.json`**: Complete provenance and audit metadata index for all 17 PDFs and 16 structured datasets.
 - **`knowledge_base/content_classification.json`**: Domain classification taxonomy and topic routing map.
 
