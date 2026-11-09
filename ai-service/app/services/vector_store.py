@@ -40,7 +40,7 @@ class QdrantVectorStore:
             self.storage_path,
             self.collection_name,
         )
-        self.client = QdrantClient(path=str(self.storage_path))
+        self.client = QdrantClient(path=str(self.storage_path), force_disable_check_same_thread=True)
         self._ensure_collection()
 
     def _ensure_collection(self) -> None:
