@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-11-09T00:16:46.292866",
+  "static_knowledge_documents": [
+    "doj_sample_report.pdf",
+    "mop_supreme_court_appointment_of_judges.pdf",
+    "mop_high_court_appointment_of_judges.pdf",
+    "model_rules_for_live_streaming_and_recording_court_proceedings.pdf",
+    "model_rules_for_efiling_supreme_court_ecommittee.pdf",
+    "model_rules_for_video_conferencing_courts.pdf",
+    "efiling_user_manual_ecourts.pdf",
+    "efiling_registration_user_manual.pdf",
+    "case_filing_user_manual.pdf",
+    "epay_final_user_manual.pdf",
+    "epay_brochure_ecommittee.pdf",
+    "nstep_user_manual.pdf",
+    "ecourts_services_brochure_ecommittee.pdf",
+    "ecourts_services_mobile_app_manual_english.pdf"
+  ],
+  "dynamic_statistics_documents": [
+    "doj_vacancy_statement_august_2026.pdf",
+    "doj_vacancy_statement_september_2025.pdf",
+    "doj_vacancy_statement_hc_breakup_2025.pdf"
+  ],
+  "overlapping_content_warnings": [
+    {
+      "type": "comparative_versions",
+      "files": [
+        "doj_vacancy_statement_august_2026.pdf",
+        "doj_vacancy_statement_september_2025.pdf",
+        "doj_vacancy_statement_hc_breakup_2025.pdf"
+      ],
+      "recommendation": "Use august_2026 as the primary. Mark september_2025 and hc_breakup_2025 as historical comparison docs with explicit date labels."
+    },
+    {
+      "type": "overlapping_manuals",
+      "files": [
+        "model_rules_for_efiling_supreme_court_ecommittee.pdf",
+        "efiling_user_manual_ecourts.pdf",
+        "efiling_registration_user_manual.pdf",
+        "case_filing_user_manual.pdf"
+      ],
+      "recommendation": "Chunk and deduplicate at the section level. The registration manual (170pp) supersedes the brief 29pp user manual for onboarding steps. Both should be retained for RAG coverage."
+    }
+  ],
+  "faq_summary": {
+    "total_faqs": 56,
+    "categories": [
+      "General"
+    ]
+  },
+  "total_knowledge_chars": 977641,
+  "notes": [
+    "NJDG pendency data (Nov 8, 2026 snapshot) must be explicitly labelled as point-in-time statistics - DO NOT present as current.",
+    "Judge vacancy data as on 01.08.2026 - note reference date explicitly in every chatbot response about judge strength.",
+    "District Judiciary vacancy stats are from July 2023 Lok Sabha session - must be clearly dated.",
+    "FTSC scheme data reflects the 2026-2031 extension (₹3,788.04 Cr); previous 2023-2026 figures are superseded.",
+    "doj_sample_report.pdf (Lok Sabha Q&A) contains parliamentary responses as of Monsoon 2023 - date all statistics accordingly.",
+    "No public eCourts/Virtual Courts APIs exist - chatbot must guide users to portals, not claim live API access."
+  ]
+}
