@@ -1,6 +1,30 @@
 node_modules
 # Keep environment variables out of version control
 .env
+.env.local
+.env.*.local
+!.env.example
 
 /generated/prisma
 /generated/prisma-js
+
+# Python virtual environments & bytecode
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# AI Service model weights, caches & local storage
+.cache/
+.tiktoken_cache/
+*.cache
+ai-service/qdrant_storage/
+ai-service/chroma_db/
+ai-service/data/vector_store/
+*.sqlite3
+*.sqlite3-journal
+
+

@@ -1,0 +1,36 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Model Weights & HuggingFace / Tokenizer Caches
+.cache/
+.tiktoken_cache/
+huggingface/
+*.bin
+*.safetensors
+*.onnx
+
+# Vector Database Storage Directories
+qdrant_storage/
+chroma_db/
+data/vector_store/
+*.sqlite3
+*.sqlite3-journal
+
+# Secrets & Environment Variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+logs/
+
