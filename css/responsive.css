@@ -1,0 +1,112 @@
+@media (max-width: 1024px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .illustrationPanel {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .tilesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 32px;
+  }
+  .statCell:nth-child(2)::after {
+    display: none;
+  }
+  .trustGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .footerGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footerCol:first-child {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 768px) {
+  .topbarContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .navLinks {
+    display: none;
+  }
+  .navLinks.mobileOpen {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--white);
+    border-bottom: 1.5px solid var(--border);
+    padding: 16px 24px;
+    box-shadow: var(--shadowModal);
+    z-index: 1000;
+  }
+  .menuToggle {
+    display: inline-flex;
+  }
+  .heroTitle {
+    font-size: 2.1rem;
+  }
+  .searchBox {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px;
+  }
+  .searchBtn {
+    justify-content: center;
+  }
+  .chatViewport {
+    min-height: 400px;
+    padding: 18px 16px;
+  }
+  .suggestedGrid {
+    grid-template-columns: 1fr;
+  }
+  .trustGrid {
+    grid-template-columns: 1fr;
+  }
+  .footerGrid {
+    grid-template-columns: 1fr;
+  }
+  .footerCol:first-child {
+    grid-column: span 1;
+  }
+  .footerBottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+}
+@media (max-width: 480px) {
+  .tilesGrid {
+    grid-template-columns: 1fr;
+  }
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  .statCell::after {
+    display: none !important;
+  }
+  .userBubble {
+    max-width: 90%;
+  }
+  .assistantCard {
+    max-width: 100%;
+    padding: 16px;
+  }
+  .inputShell {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .composerButtons {
+    justify-content: flex-end;
+  }
+}
