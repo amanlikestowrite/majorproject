@@ -45,3 +45,4 @@ def test_embedding_service_with_mock():
     batch_vecs = service.embed_documents(["doc 1", "doc 2"])
     assert len(batch_vecs) == 2
     assert len(batch_vecs[0]) == 1024
+

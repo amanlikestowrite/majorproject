@@ -171,16 +171,16 @@ class QdrantVectorStore:
 
         score_threshold = min_score if min_score is not None else self.settings.score_threshold
 
-        search_results = self.client.search(
+        query_response = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
+            query=query_vector,
             limit=top_k,
             query_filter=qdrant_filter,
             score_threshold=score_threshold,
         )
 
         results = []
-        for hit in search_results:
+        for hit in query_response.points:
             hit_data = dict(hit.payload)
             hit_data["score"] = float(hit.score)
             results.append(hit_data)
@@ -209,3 +209,4 @@ class QdrantVectorStore:
                 "status": f"uninitialized: {exc}",
                 "vector_dimension": self.vector_dim,
             }
+

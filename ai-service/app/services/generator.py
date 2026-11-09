@@ -233,3 +233,4 @@ class ResponseSynthesizer:
             citations=citations,
             audit=audit,
         )
+

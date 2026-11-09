@@ -102,3 +102,4 @@ def test_chat_endpoint(mock_retriever):
     assert len(data["citations"]) == 1
     assert data["citations"][0]["chunk_id"] == "DOJ_STAT_RULE_LIVESTREAM_R005_R008_R009"
     app.dependency_overrides.clear()
+

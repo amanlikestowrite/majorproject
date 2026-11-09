@@ -113,3 +113,4 @@ class HealthResponse(BaseModel):
     version: str = "1.0.0"
     vector_store: Dict[str, Any]
     embedding_model: Dict[str, Any]
+

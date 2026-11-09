@@ -78,3 +78,4 @@ class KnowledgeRetriever:
             "embedding_model": self.embedder.get_info(),
             "vector_store": self.vector_store.get_stats(),
         }
+

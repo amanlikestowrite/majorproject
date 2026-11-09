@@ -57,3 +57,4 @@ async def retrieve_knowledge(
             status_code=500,
             detail=f"Semantic retrieval failed: {exc}",
         ) from exc
+

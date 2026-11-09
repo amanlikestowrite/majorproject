@@ -64,3 +64,4 @@ class RetrievalRequest(BaseModel):
         le=1.0,
         description="Minimum cosine similarity cutoff score",
     )
+

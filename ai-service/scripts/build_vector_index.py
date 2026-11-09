@@ -135,3 +135,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     build_index(recreate=args.recreate, batch_size=args.batch_size)
+

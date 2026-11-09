@@ -30,3 +30,4 @@ async def check_health(retriever: KnowledgeRetriever = Depends(get_retriever)):
         vector_store=health_data["vector_store"],
         embedding_model=health_data["embedding_model"],
     )
+

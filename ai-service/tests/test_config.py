@@ -13,3 +13,4 @@ def test_default_settings():
     assert settings.embedding_dimension == 1024
     assert settings.vector_store_type == "qdrant"
     assert settings.default_top_k == 3
+

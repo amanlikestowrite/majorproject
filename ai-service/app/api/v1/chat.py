@@ -39,3 +39,4 @@ async def generate_legal_guidance(
             status_code=500,
             detail=f"Conversational generation failed: {exc}",
         ) from exc
+

@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # Embedding Model Settings (BAAI/bge-m3 default)
     embedding_model_name: str = "BAAI/bge-m3"
-    embedding_device: str = "auto"  # 'auto', 'mps', 'cuda', or 'cpu'
+    embedding_device: str = "cpu"  # 'cpu', 'mps', 'cuda', or 'auto'
     embedding_dimension: int = 1024
     embedding_batch_size: int = 16
     normalize_embeddings: bool = True
@@ -67,3 +67,4 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Return a cached singleton instance of application settings."""
     return Settings()
+
