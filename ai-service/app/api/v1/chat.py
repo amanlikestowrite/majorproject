@@ -25,10 +25,11 @@ async def generate_legal_guidance(
             topic=request.topic,
         )
 
-        response = ResponseSynthesizer.synthesize(
+        response = await ResponseSynthesizer.synthesize_async(
             query=request.message,
             retrieved_chunks=retrieved_chunks,
             user_id=request.userId,
+            conversation_id=request.conversationId,
             language=request.language or "en",
         )
 

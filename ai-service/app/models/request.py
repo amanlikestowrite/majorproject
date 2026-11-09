@@ -13,6 +13,10 @@ class ChatQueryRequest(BaseModel):
         default=None,
         description="Active conversation or user UUID from the application gateway",
     )
+    conversationId: Optional[str] = Field(
+        default=None,
+        description="Persistent conversation thread UUID if already initialized",
+    )
     message: str = Field(
         ...,
         min_length=1,

@@ -44,6 +44,7 @@ class ChatResponse(BaseModel):
     """Primary conversational response matching the frontend UI card contract."""
 
     userId: Optional[str] = Field(None, description="Conversation or user UUID")
+    conversationId: Optional[str] = Field(None, description="Persistent conversation thread UUID")
     summary: str = Field(
         ...,
         description="Core legal or procedural answer (HTML formatted or plain text)",
