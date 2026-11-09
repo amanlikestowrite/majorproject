@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma-js"
@@ -11,20 +9,119 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 model User {
-  id        String    @id @default(uuid())
-  messages  Message[]
-  createdAt DateTime  @default(now())
+  id            String         @id @default(uuid())
+  googleSub     String?        @unique
+  email         String?        @unique
+  name          String?
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
+
+  sessions      AuthSession[]
+  conversations Conversation[]
+  messages      Message[]
+  aiRequestLogs AIRequestLog[]
+}
+
+model AuthSession {
+  id               String    @id @default(uuid())
+  userId           String
+  sessionTokenHash String    @unique
+  expiresAt        DateTime
+  createdAt        DateTime  @default(now())
+  revokedAt        DateTime?
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionTokenHash, expiresAt])
+}
+
+model GuestSession {
+  id               String         @id @default(uuid())
+  sessionTokenHash String         @unique
+  expiresAt        DateTime
+  createdAt        DateTime       @default(now())
+  lastActivityAt   DateTime       @default(now())
+
+  conversations    Conversation[]
+  aiRequestLogs    AIRequestLog[]
+
+  @@index([sessionTokenHash, expiresAt])
+}
+
+model Conversation {
+  id             String         @id @default(uuid())
+  userId         String?
+  guestSessionId String?
+  title          String         @default("New Inquiry")
+  expiresAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now()) @updatedAt
+
+  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guestSession   GuestSession?  @relation(fields: [guestSessionId], references: [id], onDelete: Cascade)
+  messages       Message[]
+  aiRequestLogs  AIRequestLog[]
+
+  @@index([userId, updatedAt])
+  @@index([guestSessionId, expiresAt])
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  userId    String
-  role      String   // user or ai
-  content   String   @db.Text
-  createdAt DateTime @default(now())
+  id                 String            @id @default(uuid())
+  conversationId     String?
+  userId             String?
+  role               String            // user, assistant, system
+  content            String            @db.Text
+  structuredResponse Json?
+  createdAt          DateTime          @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation       Conversation?     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  citations          MessageCitation[]
 
   @@index([userId, createdAt])
+  @@index([conversationId, createdAt])
+}
+
+model MessageCitation {
+  id                     String   @id @default(uuid())
+  messageId              String
+  chunkId                String
+  sourceDocument         String
+  sourceUrl              String
+  pageRange              String?
+  fidelityClassification String   @default("verbatim")
+  publicationDate        String?
+  dataAsOf               String?
+  createdAt              DateTime @default(now())
+
+  message                Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([chunkId])
+}
+
+model AIRequestLog {
+  id             String        @id @default(uuid())
+  userId         String?
+  guestSessionId String?
+  conversationId String?
+  provider       String
+  model          String
+  status         String
+  latencyMs      Int
+  tokenCount     Int?
+  createdAt      DateTime      @default(now())
+
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestSession   GuestSession? @relation(fields: [guestSessionId], references: [id], onDelete: SetNull)
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([guestSessionId, createdAt])
+  @@index([conversationId, createdAt])
 }
