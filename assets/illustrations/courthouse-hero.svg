@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 400" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient for the deep navy illustration card -->
+    <linearGradient id="heroNavyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#142B4A" />
+      <stop offset="100%" stop-color="#0D1F35" />
+    </linearGradient>
+
+    <!-- Pattern for illustration card subtle background -->
+    <pattern id="cardDiamondGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 15 0 L 30 15 L 15 30 L 0 15 Z" fill="none" stroke="#294F78" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="15" cy="15" r="0.8" fill="#DFA04B" opacity="0.3"/>
+    </pattern>
+
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0D1F35" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Deep Navy Card Background -->
+  <rect width="540" height="400" rx="12" fill="url(#heroNavyGrad)" stroke="#294F78" stroke-width="1.2"/>
+  <rect width="540" height="400" rx="12" fill="url(#cardDiamondGrid)"/>
+
+  <!-- Saffron Accent Ground Line -->
+  <line x1="40" y1="310" x2="500" y2="310" stroke="#DFA04B" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Secondary Ground foundation lines -->
+  <line x1="60" y1="316" x2="480" y2="316" stroke="#FAF9F6" stroke-width="1" opacity="0.3"/>
+  <line x1="90" y1="322" x2="450" y2="322" stroke="#FAF9F6" stroke-width="0.75" opacity="0.15"/>
+
+  <!-- ========================================== -->
+  <!-- FAINT ASHOKA-CHAKRA-INSPIRED RADIAL MOTIF  -->
+  <!-- 24 ticks, radial spokes, lighter navy shade -->
+  <!-- ========================================== -->
+  <g transform="translate(270, 160)" opacity="0.25">
+    <!-- Outer concentric rings -->
+    <circle cx="0" cy="0" r="115" fill="none" stroke="#294F78" stroke-width="1.2" stroke-dasharray="2 3"/>
+    <circle cx="0" cy="0" r="105" fill="none" stroke="#FAF9F6" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="98" fill="none" stroke="#294F78" stroke-width="0.75"/>
+    <circle cx="0" cy="0" r="22" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="7" fill="#DFA04B"/>
+
+    <!-- 24 Spokes (15 degrees each) -->
+    <!-- Quadrant 1 -->
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(15)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(30)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(45)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(60)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(75)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(90)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(105)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(120)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(135)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(150)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(165)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(180)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(195)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(210)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(225)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(240)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(255)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(270)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(285)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(300)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(315)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(330)"/>
+    <line x1="0" y1="-22" x2="0" y2="-105" stroke="#FAF9F6" stroke-width="1.2" transform="rotate(345)"/>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- CLASSICAL INDIAN COURTHOUSE ILLUSTRATION   -->
+  <!-- Ivory 1.5px line strokes, flat navy fills -->
+  <!-- ========================================== -->
+  <g id="courthouseStructure">
+    <!-- Basework / Steps (Plinth) -->
+    <rect x="100" y="295" width="340" height="15" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <line x1="120" y1="300" x2="420" y2="300" stroke="#FAF9F6" stroke-width="0.8" opacity="0.6"/>
+    <rect x="120" y="283" width="300" height="12" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="135" y="273" width="270" height="10" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+
+    <!-- Left & Right Wing Blocks -->
+    <!-- Left Wing -->
+    <rect x="140" y="195" width="55" height="78" fill="#0D1F35" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="152" y="215" width="14" height="26" rx="7" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.2"/>
+    <rect x="173" y="215" width="14" height="26" rx="7" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.2"/>
+    <rect x="140" y="188" width="55" height="7" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <!-- Parapet detail Left -->
+    <line x1="140" y1="184" x2="195" y2="184" stroke="#FAF9F6" stroke-width="1.2"/>
+    <path d="M 145 184 L 145 188 M 155 184 L 155 188 M 165 184 L 165 188 M 175 184 L 175 188 M 185 184 L 185 188" stroke="#FAF9F6" stroke-width="1"/>
+
+    <!-- Right Wing -->
+    <rect x="345" y="195" width="55" height="78" fill="#0D1F35" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="353" y="215" width="14" height="26" rx="7" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.2"/>
+    <rect x="374" y="215" width="14" height="26" rx="7" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.2"/>
+    <rect x="345" y="188" width="55" height="7" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <!-- Parapet detail Right -->
+    <line x1="345" y1="184" x2="400" y2="184" stroke="#FAF9F6" stroke-width="1.2"/>
+    <path d="M 350 184 L 350 188 M 360 184 L 360 188 M 370 184 L 370 188 M 380 184 L 380 188 M 390 184 L 390 188" stroke="#FAF9F6" stroke-width="1"/>
+
+    <!-- Central Grand Portico Back Wall & Entrance -->
+    <rect x="195" y="195" width="150" height="78" fill="#0D1F35" stroke="#FAF9F6" stroke-width="1.5"/>
+    <!-- Archway Grand Entrance -->
+    <path d="M 252 273 L 252 225 C 252 215, 288 215, 288 225 L 288 273 Z" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <path d="M 258 273 L 258 230 C 258 222, 282 222, 282 230 L 282 273" fill="none" stroke="#FAF9F6" stroke-width="0.8" opacity="0.6"/>
+    <!-- Central Portico Entablature Beam -->
+    <rect x="185" y="186" width="170" height="12" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <line x1="190" y1="192" x2="350" y2="192" stroke="#FAF9F6" stroke-width="0.75" stroke-dasharray="4 3" opacity="0.6"/>
+
+    <!-- Symmetrical Classical Columns (6 Columns) -->
+    <!-- Column 1 -->
+    <rect x="197" y="198" width="10" height="75" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="194" y="197" width="16" height="4" fill="#FAF9F6"/>
+    <rect x="194" y="269" width="16" height="4" fill="#FAF9F6"/>
+
+    <!-- Column 2 -->
+    <rect x="223" y="198" width="10" height="75" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="220" y="197" width="16" height="4" fill="#FAF9F6"/>
+    <rect x="220" y="269" width="16" height="4" fill="#FAF9F6"/>
+
+    <!-- Column 3 -->
+    <rect x="245" y="198" width="10" height="75" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="242" y="197" width="16" height="4" fill="#FAF9F6"/>
+    <rect x="242" y="269" width="16" height="4" fill="#FAF9F6"/>
+
+    <!-- Column 4 -->
+    <rect x="285" y="198" width="10" height="75" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="282" y="197" width="16" height="4" fill="#FAF9F6"/>
+    <rect x="282" y="269" width="16" height="4" fill="#FAF9F6"/>
+
+    <!-- Column 5 -->
+    <rect x="307" y="198" width="10" height="75" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="304" y="197" width="16" height="4" fill="#FAF9F6"/>
+    <rect x="304" y="269" width="16" height="4" fill="#FAF9F6"/>
+
+    <!-- Column 6 -->
+    <rect x="333" y="198" width="10" height="75" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <rect x="330" y="197" width="16" height="4" fill="#FAF9F6"/>
+    <rect x="330" y="269" width="16" height="4" fill="#FAF9F6"/>
+
+    <!-- ========================================== -->
+    <!-- TRIANGULAR PEDIMENT                        -->
+    <!-- ========================================== -->
+    <polygon points="180,186 270,128 360,186" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <polygon points="194,182 270,135 346,182" fill="none" stroke="#FAF9F6" stroke-width="0.8" opacity="0.6"/>
+    <!-- Pediment Tympanum Crest: Scales of Justice inside Pediment -->
+    <g transform="translate(270, 162)">
+      <line x1="0" y1="-12" x2="0" y2="10" stroke="#DFA04B" stroke-width="1.2"/>
+      <line x1="-12" y1="-6" x2="12" y2="-6" stroke="#DFA04B" stroke-width="1.2"/>
+      <circle cx="0" cy="-6" r="1.5" fill="#DFA04B"/>
+      <!-- Left Pan -->
+      <line x1="-12" y1="-6" x2="-16" y2="2" stroke="#FAF9F6" stroke-width="0.75"/>
+      <line x1="-12" y1="-6" x2="-8" y2="2" stroke="#FAF9F6" stroke-width="0.75"/>
+      <path d="M -18 2 Q -12 6 -6 2 Z" fill="#DFA04B" opacity="0.8"/>
+      <!-- Right Pan -->
+      <line x1="12" y1="-6" x2="8" y2="2" stroke="#FAF9F6" stroke-width="0.75"/>
+      <line x1="12" y1="-6" x2="16" y2="2" stroke="#FAF9F6" stroke-width="0.75"/>
+      <path d="M 6 2 Q 12 6 18 2 Z" fill="#DFA04B" opacity="0.8"/>
+    </g>
+
+    <!-- ========================================== -->
+    <!-- CENTRAL CUPOLA DOME & SAFFRON FLAG         -->
+    <!-- ========================================== -->
+    <!-- Drum / Base of the dome -->
+    <rect x="235" y="105" width="70" height="23" fill="#0D1F35" stroke="#FAF9F6" stroke-width="1.5"/>
+    <line x1="243" y1="108" x2="243" y2="125" stroke="#FAF9F6" stroke-width="1" opacity="0.6"/>
+    <line x1="255" y1="108" x2="255" y2="125" stroke="#FAF9F6" stroke-width="1" opacity="0.6"/>
+    <line x1="270" y1="108" x2="270" y2="125" stroke="#FAF9F6" stroke-width="1" opacity="0.6"/>
+    <line x1="285" y1="108" x2="285" y2="125" stroke="#FAF9F6" stroke-width="1" opacity="0.6"/>
+    <line x1="297" y1="108" x2="297" y2="125" stroke="#FAF9F6" stroke-width="1" opacity="0.6"/>
+    <rect x="232" y="102" width="76" height="4" fill="#FAF9F6"/>
+
+    <!-- Classical Central Dome Shape -->
+    <!-- Double-curved or hemispherical dome -->
+    <path d="M 235 102 C 235 55, 305 55, 305 102 Z" fill="#142B4A" stroke="#FAF9F6" stroke-width="1.5"/>
+    <path d="M 245 102 C 245 68, 295 68, 295 102" fill="none" stroke="#FAF9F6" stroke-width="0.75" opacity="0.4"/>
+    <!-- Dome ribs -->
+    <path d="M 270 56 L 270 102" stroke="#FAF9F6" stroke-width="0.9" opacity="0.7"/>
+    <path d="M 270 56 Q 256 75 252 102" stroke="#FAF9F6" stroke-width="0.75" opacity="0.5"/>
+    <path d="M 270 56 Q 284 75 288 102" stroke="#FAF9F6" stroke-width="0.75" opacity="0.5"/>
+
+    <!-- Lantern / Finial on Top of Dome -->
+    <rect x="267" y="47" width="6" height="9" fill="#DFA04B" stroke="#FAF9F6" stroke-width="1"/>
+    <circle cx="270" cy="45" r="2.5" fill="#DFA04B"/>
+
+    <!-- Flagpole & Small Saffron Flag -->
+    <line x1="270" y1="45" x2="270" y2="24" stroke="#FAF9F6" stroke-width="1.5"/>
+    <!-- Saffron Triangular Flag -->
+    <path d="M 270 24 L 290 31 L 270 38 Z" fill="#DFA04B" stroke="#FAF9F6" stroke-width="0.8"/>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- OVERLAID INFORMATION CARD WITH SAFFRON BORDER -->
+  <!-- "Your guide to justice / Find answers..." -->
+  <!-- ========================================== -->
+  <g transform="translate(320, 260)" filter="url(#cardShadow)">
+    <!-- White Card with Saffron Left Border -->
+    <rect x="0" y="0" width="195" height="88" rx="6" fill="#FAF9F6" stroke="#E3E7ED" stroke-width="1"/>
+    <!-- Saffron Left Bar -->
+    <rect x="0" y="0" width="5" height="88" rx="2" fill="#DFA04B"/>
+
+    <!-- Small Eyebrow / Tag -->
+    <circle cx="20" cy="22" r="3.5" fill="#477C68"/>
+    <text x="30" y="25" fill="#718096" font-family="'Inter', sans-serif" font-size="8.5" font-weight="600" letter-spacing="0.5">CITIZEN ASSISTANCE</text>
+
+    <!-- Heading -->
+    <text x="16" y="46" fill="#142B4A" font-family="'DM Serif Display', 'Playfair Display', serif" font-size="15" font-weight="600">Your guide to justice</text>
+
+    <!-- Supporting Text -->
+    <text x="16" y="64" fill="#718096" font-family="'Inter', sans-serif" font-size="9" font-weight="500">Find answers. Understand procedures.</text>
+    <text x="16" y="76" fill="#718096" font-family="'Inter', sans-serif" font-size="9" font-weight="500">Access official services.</text>
+  </g>
+</svg>
+
