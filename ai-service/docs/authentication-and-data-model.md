@@ -166,6 +166,24 @@ Decouples inquiry threads from individual users, enabling both authenticated and
 | `createdAt` | `TIMESTAMP(3)` | `DEFAULT CURRENT_TIMESTAMP` | Thread creation timestamp. |
 | `updatedAt` | `TIMESTAMP(3)` | `DEFAULT CURRENT_TIMESTAMP`, `INDEX` | Last message timestamp. |
 
+#### Ownership Integrity (Exclusive Ownership)
+To ensure strict security and prevent ambiguous or orphaned conversations, each conversation must have **exactly one owner**:
+1. **Database-Level CHECK Constraint (`Conversation_owner_check`):**
+   ```sql
+   ALTER TABLE "Conversation" ADD CONSTRAINT "Conversation_owner_check" 
+       CHECK (
+           ("userId" IS NOT NULL AND "guestSessionId" IS NULL) OR 
+           ("userId" IS NULL AND "guestSessionId" IS NOT NULL)
+       );
+   ```
+2. **Application-Level Enforcement (Express Gateway):**
+   - In incoming requests, the Express middleware determines the caller context (authenticated session via `nyaya_session` cookie or guest session via `nyaya_guest` cookie).
+   - If both or neither are resolved, the gateway rejects the request with `400 Bad Request` before calling Prisma.
+   - When creating a conversation, either `userId` or `guestSessionId` is populated—never both, never neither.
+   - During guest-to-authenticated migration, the transfer is executed within an atomic Prisma transaction (`prisma.$transaction`) setting `userId` and clearing `guestSessionId` simultaneously.
+| `createdAt` | `TIMESTAMP(3)` | `DEFAULT CURRENT_TIMESTAMP` | Thread creation timestamp. |
+| `updatedAt` | `TIMESTAMP(3)` | `DEFAULT CURRENT_TIMESTAMP`, `INDEX` | Last message timestamp. |
+
 ### 3.5 `Message`
 Individual user queries and AI-generated assistant replies.
 
@@ -258,9 +276,9 @@ sequenceDiagram
 
 ---
 
-## 5. Migration Safety Audit
+## 5. Migration Safety & Compatibility Audit
 
-The migration script `20261110000000_add_guest_and_auth_schema/migration.sql` was audited against production safety criteria:
+The migration script `20261110000000_add_guest_and_auth_schema/migration.sql` was verified using the official Prisma CLI (`prisma validate` and `prisma migrate diff`) against the existing migration history:
 
 | Safety Criterion | Audit Result | Details |
 | :--- | :--- | :--- |
@@ -268,14 +286,25 @@ The migration script `20261110000000_add_guest_and_auth_schema/migration.sql` wa
 | **Destructive Columns (`DROP COLUMN`)** | **0 (Zero)** | No existing columns are removed. |
 | **Existing Data Preservation** | **100% Preserved** | Existing `User` and `Message` rows remain valid and accessible. |
 | **Nullable Column Transitions** | **Safe** | `Message.userId` changed from `NOT NULL` to nullable via `ALTER COLUMN "userId" DROP NOT NULL;`, allowing guest messages while preserving all historical foreign key relationships. |
-| **Constraint Idempotency** | **Safe** | All table and index creations use `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`. |
+| **Conversation Ownership** | **Enforced** | `Conversation_owner_check` CHECK constraint guarantees mutual exclusivity of `userId` and `guestSessionId`. |
+| **Prisma CLI Validation** | **Passed** | Schema validated successfully with Prisma CLI 7.10.1 (`prisma validate`). |
+| **Prisma Schema Formatting** | **Passed** | Schema formatted with canonical PSL conventions (`prisma format`). |
+
+### 5.1 Legacy Message Compatibility & Backfill Strategy
+- **Historical Records:** In the original `20261109165718_init` schema, messages were associated directly with `User` via `userId` without a `Conversation` model.
+- **Zero Loss Guarantee:** All existing messages retain their valid `userId` foreign key. Their `conversationId` remains `NULL`.
+- **Query Compatibility:** Historical messages remain queryable via `/chatHistory/:userId`.
+- **Optional Future Backfill:** A lightweight data migration script can cluster pre-existing user messages into synthetic `Conversation` rows (`title = "Historical Session"`) if unified timeline grouping is desired in the future. No data is lost or altered.
 
 ---
 
 ## 6. Implementation Checklist & Phase Boundaries
 
 - [x] Phase 4A: Database Schema Design & Migration SQL prepared.
-- [x] Phase 4A: Architecture and Data Model Documentation created.
+- [x] Phase 4A.1: Prisma CLI restored (7.10.1) and schema validated.
+- [x] Phase 4A.1: Canonical migration diff generated and ownership CHECK constraint applied.
+- [x] Phase 4A.1: Architecture, legacy compatibility, and data model documentation updated.
 - [ ] Phase 4B: Express Gateway Google Auth & Session Middleware (pending approval to execute migration).
 - [ ] Phase 4C: Gemini 2.5 Integration in `ai-service/app/services/generator.py`.
 - [ ] Phase 4D: Frontend UI Integration for Guest vs Authenticated User Flows.
+
