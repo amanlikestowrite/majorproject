@@ -47,10 +47,10 @@ class GeminiProvider:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model_name: str = "gemini-2.5-flash",
+        model_name: str = "gemini-3.5-flash",
         temperature: float = 0.2,
-        max_output_tokens: int = 1024,
-        timeout_seconds: float = 15.0,
+        max_output_tokens: int = 4096,
+        timeout_seconds: float = 30.0,
     ) -> None:
         self.api_key = api_key.strip() if api_key and api_key.strip() else None
         self.model_name = model_name
@@ -185,7 +185,7 @@ class GeminiProvider:
             max_output_tokens=self.max_output_tokens,
             response_mime_type="application/json",
             system_instruction=system_instruction,
-            http_options=types.HttpOptions(timeout=int(self.timeout_seconds)),
+            http_options=types.HttpOptions(timeout=int(self.timeout_seconds * 1000)),
         )
 
         try:
@@ -195,17 +195,25 @@ class GeminiProvider:
                 config=config,
             )
 
-            raw_text = response.text.strip()
+            raw_text = None
+            if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                text_parts = [p.text for p in response.candidates[0].content.parts if hasattr(p, "text") and p.text]
+                if text_parts:
+                    raw_text = "".join(text_parts).strip()
+            if not raw_text:
+                raw_text = (response.text or "").strip()
+
             if not raw_text:
                 raise InvalidJSONError("Gemini returned empty response text")
 
             parsed = json.loads(raw_text)
 
         except (TimeoutError, Exception) as exc:
+            err_name = type(exc).__name__.lower()
             err_str = str(exc).lower()
             if "429" in err_str or "resource_exhausted" in err_str or "quota" in err_str:
                 raise QuotaExhaustedError(f"Gemini API quota exceeded or rate limited: {exc}") from exc
-            elif "timed out" in err_str or "timeout" in err_str:
+            elif "timed out" in err_str or "timeout" in err_str or "timeout" in err_name:
                 raise ProviderTimeoutError(f"Gemini request timed out after {self.timeout_seconds}s: {exc}") from exc
             elif isinstance(exc, json.JSONDecodeError):
                 raise InvalidJSONError(f"Gemini returned invalid JSON payload: {exc}") from exc
@@ -241,3 +249,4 @@ class GeminiProvider:
             "conflicting_sources": conflicting_sources,
             "cited_chunk_ids": validated_citations,
         }
+

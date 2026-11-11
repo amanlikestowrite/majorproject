@@ -57,10 +57,10 @@ class Settings(BaseSettings):
 
     # Gemini RAG Generation Settings
     gemini_api_key: Optional[str] = None
-    gemini_model_name: str = "gemini-2.5-flash"
+    gemini_model_name: str = "gemini-3.5-flash"
     gemini_temperature: float = 0.2
-    gemini_max_output_tokens: int = 1024
-    gemini_timeout_seconds: float = 15.0
+    gemini_max_output_tokens: int = 4096
+    gemini_timeout_seconds: float = 30.0
 
     model_config = SettingsConfigDict(
         env_file=str(SERVICE_DIR / ".env"),

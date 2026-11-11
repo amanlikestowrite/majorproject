@@ -314,3 +314,4 @@ def test_response_schema_validation(mock_chunks):
     assert fallback_res.citations[0].chunk_id == "DOJ_STAT_RULE_LIVESTREAM_R005"
     assert fallback_res.portal is not None
     assert fallback_res.source is not None
+

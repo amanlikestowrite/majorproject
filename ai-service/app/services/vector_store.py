@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qmodels
 
-from app.config import Settings, get_settings
+from app.config import Settings, get_settings, SERVICE_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,8 @@ class QdrantVectorStore:
     def __init__(self, settings: Optional[Settings] = None):
         self.settings = settings or get_settings()
         self.storage_path = Path(self.settings.qdrant_storage_path)
+        if not self.storage_path.is_absolute():
+            self.storage_path = (SERVICE_DIR / self.storage_path).resolve()
         self.collection_name = self.settings.qdrant_collection_name
         self.vector_dim = self.settings.embedding_dimension
 
