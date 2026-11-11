@@ -1,17 +1,13 @@
 """
-Nyaya Sahayak — Response Synthesis Service
+Nyaya Sahayak — Grounded Legal Response Synthesis Service
 
-Constructs structured legal assistance responses conforming to the presentation
-contract expected by the frontend assistant card renderer, backed by verifiable citations.
-Supports both LLM-grounded generation via Google Gemini and deterministic fallback synthesis.
+Coordinates evidence validation, Gemini generation via the official google-genai SDK,
+citation verification, untrusted document isolation, and transparent evidence-only fallback.
 """
 
-import json
 import logging
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
-
-import httpx
 
 from app.config import get_settings
 from app.models.response import (
@@ -19,6 +15,14 @@ from app.models.response import (
     ChatResponse,
     Citation,
     PortalInfo,
+)
+from app.services.providers.gemini_provider import (
+    GeminiProvider,
+    GeminiProviderError,
+    ProviderNotConfiguredError,
+    ProviderTimeoutError,
+    QuotaExhaustedError,
+    InvalidJSONError,
 )
 
 logger = logging.getLogger(__name__)
@@ -95,7 +99,6 @@ def extract_procedural_steps(content: str) -> List[str]:
     lines = content.split("\n")
     for line in lines:
         stripped = line.strip()
-        # Match numbered lists or bullet points
         if stripped.startswith(("- ", "* ", "1. ", "2. ", "3. ", "4. ", "5. ", "6. ")):
             cleaned = stripped.lstrip("-*0123456789. ")
             if len(cleaned) > 10 and not cleaned.startswith("#"):
@@ -103,7 +106,6 @@ def extract_procedural_steps(content: str) -> List[str]:
         if len(steps) >= 4:
             break
 
-    # If markdown lacked numbered lists, extract key informative paragraphs
     if not steps:
         paragraphs = [p.strip() for p in content.split("\n\n") if len(p.strip()) > 30 and not p.strip().startswith("#")]
         steps = paragraphs[:3]
@@ -112,7 +114,7 @@ def extract_procedural_steps(content: str) -> List[str]:
 
 
 def build_citations_from_chunks(chunks: List[Dict[str, Any]]) -> List[Citation]:
-    """Construct a list of Citation models from retrieved chunks."""
+    """Construct verified Citation models directly from retrieved chunk metadata."""
     citations: List[Citation] = []
     for chunk in chunks:
         citations.append(
@@ -123,36 +125,41 @@ def build_citations_from_chunks(chunks: List[Dict[str, Any]]) -> List[Citation]:
                 source_url=chunk.get("source_url", "https://doj.gov.in"),
                 fidelity_classification=chunk.get("fidelity_classification", "verbatim"),
                 data_as_of=chunk.get("data_as_of"),
+                publication_date=chunk.get("publication_date"),
+                information_type=chunk.get("information_type", "static"),
             )
         )
     return citations
 
 
 class ResponseSynthesizer:
-    """Transforms retrieved knowledge chunks into citation-backed frontend cards."""
+    """Coordinates grounded legal response generation, citation verification, and fallback."""
 
     @classmethod
-    def synthesize_deterministic(
+    def synthesize_evidence_only(
         cls,
         query: str,
         retrieved_chunks: List[Dict[str, Any]],
         user_id: Optional[str] = None,
         conversation_id: Optional[str] = None,
-        language: str = "en",
+        failure_reason: Optional[str] = None,
     ) -> ChatResponse:
-        """Deterministic chunk extraction fallback used when LLM is unavailable or offline."""
+        """
+        Return an explicit evidence-only response when Gemini is not configured or unavailable.
+        Never fabricates a synthesized answer to hide provider failure.
+        """
         if not retrieved_chunks:
             portal = CANONICAL_PORTALS["doj"]
             return ChatResponse(
                 userId=user_id,
                 conversationId=conversation_id,
-                summary="Nyaya Sahayak is ready to guide you on Department of Justice initiatives, court procedures, case status, eFiling, and judicial vacancies. No matching official record was located for this specific query.",
+                summary="No matching official Department of Justice record was located with sufficient evidence to answer this inquiry.",
                 steps=[
                     "Check if your inquiry relates to Case Status, Traffic Challans, eFiling, Free Legal Aid, or Judicial Appointments.",
                     "Verify the CNR number or specific procedural category and query again.",
                     "For certified court orders and judicial filings, refer directly to official court portals.",
                 ],
-                important="Nyaya Sahayak provides administrative and procedural guidance and does not provide legal representation.",
+                important="Abstention Notice: Insufficient evidence in official knowledge base.",
                 portal=PortalInfo(
                     title=portal["title"],
                     url=portal["url"],
@@ -166,56 +173,38 @@ class ResponseSynthesizer:
                 ],
                 citations=[],
                 audit=None,
+                generation_status="abstained_insufficient_evidence",
+                provider="none",
+                model=None,
+                conflicting_sources_flag=False,
             )
 
         primary = retrieved_chunks[0]
         topic = primary.get("topic", "Department of Justice")
         primary_content = primary.get("source_content") or primary.get("content", "")
-
+        portal = resolve_portal_for_topic(topic, primary.get("source_url"))
         citations = build_citations_from_chunks(retrieved_chunks)
-        steps = extract_procedural_steps(primary_content)
 
         paragraphs = [p.strip() for p in primary_content.split("\n\n") if len(p.strip()) > 20 and not p.strip().startswith("#")]
-        summary = paragraphs[0] if paragraphs else primary_content[:300]
+        first_p = paragraphs[0] if paragraphs else primary_content[:300]
 
-        important = None
-        if primary.get("audit_notes"):
-            important = f"Official Audit Note: {primary['audit_notes']}"
-        elif "rule" in primary.get("content_type", "").lower() or "livestream" in primary["chunk_id"].lower():
-            important = "Statutory Notice: All court proceeding recordings and live streams are protected under the Copyright Act, 1957 and IT Act, 2000. Unauthorized capture or sharing is strictly prohibited."
-        elif primary.get("information_type") == "dynamic":
+        reason_prefix = f" [{failure_reason}]" if failure_reason else " [AI Generation Unavailable]"
+        summary = (
+            f"{reason_prefix} AI synthesis was not performed. Below is the verified official record retrieved for your query:\n\n"
+            f"{first_p}"
+        )
+
+        steps = extract_procedural_steps(primary_content)
+
+        important = "Notice: This response contains raw verified government text without AI synthesis."
+        if primary.get("information_type") == "dynamic":
             as_of = primary.get("data_as_of", "publication date")
-            important = f"Point-in-Time Statistic: This metric reflects official data as of {as_of}. Real-time statistics are updated monthly by the Department of Justice."
-
-        portal = resolve_portal_for_topic(topic, primary.get("source_url"))
+            important += f" Statistical currency: Official metric as of {as_of}."
 
         doc_name = primary.get("source_document", "Department of Justice")
         page_info = f" (Page {primary.get('page_number_or_range')})" if primary.get("page_number_or_range") else ""
         as_of_info = f" [Data as of {primary.get('data_as_of')}]" if primary.get("data_as_of") else ""
         source_stmt = f"{doc_name}{page_info}{as_of_info} — Ministry of Law & Justice, Govt. of India"
-
-        follow_ups = [
-            f"Where can I find certified records for {topic}?",
-            "What is the official procedure on the government portal?",
-        ]
-        if "vacancy" in topic.lower():
-            follow_ups = [
-                "What is the sanctioned judge strength in the Supreme Court?",
-                "How many permanent judge vacancies exist in High Courts?",
-                "What is the Memorandum of Procedure (MoP) for judge appointments?",
-            ]
-        elif "live-stream" in topic.lower():
-            follow_ups = [
-                "What proceedings are strictly excluded from live streaming?",
-                "What is the statutory delay buffer under Rule 8.3?",
-                "What are the penalties for unauthorized recording under Rule 9?",
-            ]
-        elif "tele-law" in topic.lower():
-            follow_ups = [
-                "Who is eligible for free legal advice under Section 12?",
-                "How can I book an appointment with a panel lawyer via CSC?",
-                "Is Tele-Law available through a mobile application?",
-            ]
 
         audit = AuditMetadata(
             information_type=primary.get("information_type", "static"),
@@ -232,106 +221,82 @@ class ResponseSynthesizer:
             important=important,
             portal=portal,
             source=source_stmt,
-            followUps=follow_ups,
+            followUps=[
+                f"Where can I find certified records for {topic}?",
+                "What is the official procedure on the government portal?",
+            ],
             citations=citations,
             audit=audit,
+            generation_status="evidence_only",
+            provider="none",
+            model=None,
+            conflicting_sources_flag=False,
         )
 
     @classmethod
-    async def synthesize_with_gemini(
+    async def synthesize_async(
         cls,
         query: str,
         retrieved_chunks: List[Dict[str, Any]],
         user_id: Optional[str] = None,
         conversation_id: Optional[str] = None,
         language: str = "en",
+        provider: Optional[GeminiProvider] = None,
     ) -> ChatResponse:
-        """Call Google Gemini 2.5 API with strict source grounding to synthesize response."""
+        """
+        Asynchronously generate a grounded legal answer using Gemini.
+        Falls back cleanly to an explicitly labelled evidence-only result if Gemini is unavailable.
+        """
+        if not retrieved_chunks:
+            return cls.synthesize_evidence_only(
+                query=query,
+                retrieved_chunks=[],
+                user_id=user_id,
+                conversation_id=conversation_id,
+            )
+
         settings = get_settings()
-        api_key = settings.gemini_api_key
-        if not api_key:
-            return cls.synthesize_deterministic(query, retrieved_chunks, user_id, conversation_id, language)
 
-        primary = retrieved_chunks[0]
-        topic = primary.get("topic", "Department of Justice")
-        portal = resolve_portal_for_topic(topic, primary.get("source_url"))
-        citations = build_citations_from_chunks(retrieved_chunks)
+        # Initialize provider if not injected
+        if provider is None:
+            provider = GeminiProvider(
+                api_key=settings.gemini_api_key,
+                model_name=settings.gemini_model_name,
+                temperature=settings.gemini_temperature,
+                max_output_tokens=settings.gemini_max_output_tokens,
+                timeout_seconds=settings.gemini_timeout_seconds,
+            )
 
-        # Build context from chunks
-        context_blocks = []
-        for i, chunk in enumerate(retrieved_chunks, 1):
-            cid = chunk.get("chunk_id", f"CHUNK_{i}")
-            doc = chunk.get("source_document", "Official Document")
-            content = chunk.get("source_content") or chunk.get("content", "")
-            context_blocks.append(f"[{cid}] (Document: {doc})\n{content}")
-
-        context_str = "\n\n---\n\n".join(context_blocks)
-
-        system_instruction = (
-            "You are Nyaya Sahayak, the Department of Justice AI assistant (Ministry of Law & Justice, Govt. of India). "
-            "Your role is to provide accurate, procedural, and administrative guidance based strictly on the verified "
-            "official context chunks provided below.\n\n"
-            "STRICT GROUNDING RULES:\n"
-            "1. You must ONLY answer using factual statements directly verifiable from the provided source chunks.\n"
-            "2. Never hallucinate, extrapolate, or invent legal provisions, statistics, vacancy counts, or procedures.\n"
-            "3. If the context does not contain enough information, state that clearly.\n"
-            "4. Respond in valid JSON adhering to the specified schema without preamble or markdown wraps outside the JSON.\n"
-            "5. Language target: " + language + ".\n"
-        )
-
-        user_prompt = (
-            f"Citizen Question: {query}\n\n"
-            f"Verified Official Source Chunks:\n{context_str}\n\n"
-            "Format your response as a valid JSON object with the following keys:\n"
-            '{\n'
-            '  "summary": "Clear, direct 2-3 sentence answer to the citizen (HTML <strong> tags allowed for key terms)",\n'
-            '  "steps": ["Step or key takeaway 1", "Step or key takeaway 2", ...],\n'
-            '  "important": "Statutory warning, point-in-time statistic note, or disclaimer (or null)",\n'
-            '  "followUps": ["Relevant follow-up question 1", "Relevant follow-up question 2", ...]\n'
-            '}'
-        )
-
-        gemini_url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{settings.gemini_model_name}:generateContent?key={api_key}"
-        )
-
-        payload = {
-            "system_instruction": {
-                "parts": [{"text": system_instruction}]
-            },
-            "contents": [
-                {
-                    "parts": [{"text": user_prompt}]
-                }
-            ],
-            "generationConfig": {
-                "temperature": settings.gemini_temperature,
-                "maxOutputTokens": settings.gemini_max_output_tokens,
-                "responseMimeType": "application/json",
-            },
-        }
+        if not provider.is_configured:
+            return cls.synthesize_evidence_only(
+                query=query,
+                retrieved_chunks=retrieved_chunks,
+                user_id=user_id,
+                conversation_id=conversation_id,
+                failure_reason="Gemini API key is not configured",
+            )
 
         try:
-            async with httpx.AsyncClient(timeout=settings.gemini_timeout_seconds) as client:
-                res = await client.post(gemini_url, json=payload)
-                res.raise_for_status()
-                data = res.json()
+            result = await provider.generate_grounded_answer(
+                query=query,
+                context_chunks=retrieved_chunks,
+                language=language,
+            )
 
-            candidates = data.get("candidates", [])
-            if not candidates:
-                raise ValueError("No candidates returned from Gemini API")
+            primary = retrieved_chunks[0]
+            topic = primary.get("topic", "Department of Justice")
+            portal = resolve_portal_for_topic(topic, primary.get("source_url"))
 
-            raw_text = candidates[0]["content"]["parts"][0]["text"].strip()
-            parsed = json.loads(raw_text)
+            # Build map of all valid citations
+            all_citations_map = {c["chunk_id"]: c for c in retrieved_chunks if "chunk_id" in c}
 
-            summary = parsed.get("summary") or "Grounded legal guidance based on Department of Justice records."
-            steps = parsed.get("steps") or extract_procedural_steps(primary.get("source_content", ""))
-            important = parsed.get("important")
-            follow_ups = parsed.get("followUps") or [
-                f"Where can I find certified records for {topic}?",
-                "What is the official procedure on the government portal?",
-            ]
+            # Filter citations to only those cited by the model
+            cited_ids = result.get("cited_chunk_ids", [])
+            selected_chunks = [all_citations_map[cid] for cid in cited_ids if cid in all_citations_map]
+            if not selected_chunks and not result.get("abstained"):
+                selected_chunks = retrieved_chunks
+
+            citations = build_citations_from_chunks(selected_chunks)
 
             doc_name = primary.get("source_document", "Department of Justice")
             page_info = f" (Page {primary.get('page_number_or_range')})" if primary.get("page_number_or_range") else ""
@@ -345,56 +310,54 @@ class ResponseSynthesizer:
                 audit_notes=primary.get("audit_notes"),
             )
 
+            if result.get("abstained"):
+                return ChatResponse(
+                    userId=user_id,
+                    conversationId=conversation_id,
+                    summary=result["summary"],
+                    steps=result.get("steps", []),
+                    important=result.get("abstention_reason") or "Abstention: Insufficient factual evidence in official records.",
+                    portal=portal,
+                    source=source_stmt,
+                    followUps=result.get("followUps", []),
+                    citations=[],
+                    audit=audit,
+                    generation_status="abstained_insufficient_evidence",
+                    provider="gemini",
+                    model=provider.model_name,
+                    conflicting_sources_flag=False,
+                )
+
             return ChatResponse(
                 userId=user_id,
                 conversationId=conversation_id,
-                summary=summary,
-                steps=steps,
-                important=important,
+                summary=result["summary"],
+                steps=result.get("steps", []),
+                important=result.get("important"),
                 portal=portal,
                 source=source_stmt,
-                followUps=follow_ups,
+                followUps=result.get("followUps", []),
                 citations=citations,
                 audit=audit,
+                generation_status="grounded_generation",
+                provider="gemini",
+                model=provider.model_name,
+                conflicting_sources_flag=result.get("conflicting_sources", False),
             )
 
-        except Exception as exc:
+        except (ProviderTimeoutError, QuotaExhaustedError, InvalidJSONError, GeminiProviderError, Exception) as exc:
             logger.warning(
-                "Gemini generation failed or timed out (%s); falling back to deterministic synthesis.",
+                "Gemini generation failed (%s: %s); returning explicitly labelled evidence-only response.",
+                type(exc).__name__,
                 exc,
             )
-            return cls.synthesize_deterministic(query, retrieved_chunks, user_id, conversation_id, language)
-
-    @classmethod
-    async def synthesize_async(
-        cls,
-        query: str,
-        retrieved_chunks: List[Dict[str, Any]],
-        user_id: Optional[str] = None,
-        conversation_id: Optional[str] = None,
-        language: str = "en",
-    ) -> ChatResponse:
-        """Asynchronous synthesis entrypoint dynamically selecting Gemini or deterministic fallback."""
-        if not retrieved_chunks:
-            return cls.synthesize_deterministic(query, [], user_id, conversation_id, language)
-
-        settings = get_settings()
-        if settings.gemini_api_key:
-            return await cls.synthesize_with_gemini(
+            return cls.synthesize_evidence_only(
                 query=query,
                 retrieved_chunks=retrieved_chunks,
                 user_id=user_id,
                 conversation_id=conversation_id,
-                language=language,
+                failure_reason=f"AI Provider Error: {type(exc).__name__}",
             )
-
-        return cls.synthesize_deterministic(
-            query=query,
-            retrieved_chunks=retrieved_chunks,
-            user_id=user_id,
-            conversation_id=conversation_id,
-            language=language,
-        )
 
     @classmethod
     def synthesize(
@@ -405,11 +368,10 @@ class ResponseSynthesizer:
         conversation_id: Optional[str] = None,
         language: str = "en",
     ) -> ChatResponse:
-        """Synchronous synthesis interface for backward compatibility."""
-        return cls.synthesize_deterministic(
+        """Synchronous synthesis fallback returning evidence-only response."""
+        return cls.synthesize_evidence_only(
             query=query,
             retrieved_chunks=retrieved_chunks,
             user_id=user_id,
             conversation_id=conversation_id,
-            language=language,
         )

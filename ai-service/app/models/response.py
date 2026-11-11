@@ -29,6 +29,8 @@ class Citation(BaseModel):
         description="Fidelity status (verbatim, structured_from_source, derived_with_audit_note)",
     )
     data_as_of: Optional[str] = Field(None, description="Factual currency timestamp")
+    publication_date: Optional[str] = Field(None, description="Gazette / release date")
+    information_type: Optional[str] = Field("static", description="'static' or 'dynamic'")
 
 
 class AuditMetadata(BaseModel):
@@ -76,6 +78,22 @@ class ChatResponse(BaseModel):
     audit: Optional[AuditMetadata] = Field(
         None,
         description="Provenance and derivation metadata",
+    )
+    generation_status: str = Field(
+        "grounded_generation",
+        description="Generation status: 'grounded_generation', 'evidence_only', 'abstained_insufficient_evidence', or 'provider_unavailable'",
+    )
+    provider: str = Field(
+        "gemini",
+        description="AI generation provider, e.g. 'gemini' or 'none'",
+    )
+    model: Optional[str] = Field(
+        None,
+        description="Actual LLM model identifier used for generation",
+    )
+    conflicting_sources_flag: bool = Field(
+        False,
+        description="Flag indicating whether conflicting official data was detected across sources",
     )
 
 
