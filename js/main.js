@@ -2,6 +2,7 @@
   'use strict';
   let isAwaitingResponse = false;
   let activeUtterance = null;
+  let activeConversationId = null;
   const dom = {
     heroInput: document.getElementById('heroInput'),
     heroSearchBtn: document.getElementById('heroSearchBtn'),
@@ -126,6 +127,47 @@
         </div>
       `;
     }
+
+    let citationsHtml = '';
+    if (Array.isArray(data.citations) && data.citations.length > 0) {
+      const citCards = data.citations.map(cit => {
+        const doc = cit.document || cit.source_document || 'Official DoJ Document';
+        const page = (cit.page_range || cit.page_number_or_range) ? ` (Section/Page: ${cit.page_range || cit.page_number_or_range})` : '';
+        const url = cit.source_url || '#';
+        const chunkId = cit.chunk_id ? `<span class="citationChunkId">${escapeHtml(cit.chunk_id)}</span>` : '';
+        const dateBadge = cit.data_as_of ? `<span class="citationDateBadge">Official metric as of ${escapeHtml(cit.data_as_of)}</span>` : '';
+        const link = (url && url !== '#')
+          ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="citationLink">Verify on Official Portal &nearr;</a>`
+          : '';
+
+        return `
+          <div class="citationCard">
+            <div class="citationCardTop">
+              <span class="citationDocTitle">${escapeHtml(doc)}${escapeHtml(page)}</span>
+              ${dateBadge}
+            </div>
+            <div class="citationCardBottom">
+              ${chunkId}
+              ${link}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      citationsHtml = `
+        <div class="citationsContainer">
+          <div class="citationsHeader">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span>Verified Legal Citations &amp; Statutory References</span>
+          </div>
+          <div class="citationsGrid">${citCards}</div>
+        </div>
+      `;
+    }
+
     let followUpsHtml = '';
     if (data.followUps && data.followUps.length > 0) {
       const chips = data.followUps.map(q => `
@@ -174,6 +216,7 @@
           <span class="timestamp">${getFormattedTime()}</span>
         </div>
         ${bodyHtml}
+        ${citationsHtml}
         ${followUpsHtml}
         ${utilitiesHtml}
       </div>
@@ -238,7 +281,7 @@
       });
     }
   }
-  function handleUserQuery(query) {
+  async function handleUserQuery(query) {
     if (!query || !query.trim() || isAwaitingResponse) return;
     const cleanQuery = query.trim();
     isAwaitingResponse = true;
@@ -251,17 +294,69 @@
       dom.typingIndicator.style.display = 'flex';
       scrollChatBottom();
     }
-    const delay = Math.floor(Math.random() * 400) + 450;
-    setTimeout(() => {
-      const match = findBestKnowledgeMatch(cleanQuery);
-      if (dom.typingIndicator) {
-        dom.typingIndicator.style.display = 'none';
+
+    try {
+      const baseUrl = window.AuthManager ? window.AuthManager.getBaseUrl() : '';
+      const headers = window.AuthManager ? window.AuthManager.getAuthHeaders() : {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      const payload = {
+        message: cleanQuery,
+        language: 'en',
+        topic: 'General Judicial Guidance',
+        top_k: 3,
+      };
+      if (activeConversationId) {
+        payload.conversationId = activeConversationId;
       }
-      renderAssistantResponse(match);
+
+      const res = await fetch(`${baseUrl}/api/chat`, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.message || `Service returned status ${res.status}`);
+      }
+
+      const resBody = await res.json();
+      if (resBody.status === 'success' && resBody.data) {
+        if (resBody.data.conversationId) {
+          activeConversationId = resBody.data.conversationId;
+        }
+        if (resBody.guestToken && window.AuthManager) {
+          localStorage.setItem('nyaya_guest_token', resBody.guestToken);
+          window.AuthManager.checkExistingSession();
+        }
+
+        if (dom.typingIndicator) dom.typingIndicator.style.display = 'none';
+        renderAssistantResponse(resBody.data);
+      } else {
+        throw new Error(resBody.message || 'Malformed response from AI service');
+      }
+    } catch (err) {
+      console.warn('Live API request failed, falling back to cached knowledge base:', err.message);
+      if (dom.typingIndicator) dom.typingIndicator.style.display = 'none';
+
+      // Graceful offline fallback using validated cached knowledge base
+      const localMatch = findBestKnowledgeMatch(cleanQuery);
+      const enhancedFallback = {
+        ...localMatch,
+        important: `Notice (Offline Mode): Connected to local knowledge cache (${err.message}). ${localMatch.important || ''}`,
+      };
+      renderAssistantResponse(enhancedFallback);
+    } finally {
       isAwaitingResponse = false;
-    }, delay);
+      scrollChatBottom();
+    }
   }
   function resetToNewConversation() {
+    activeConversationId = null;
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (dom.chatStream) {
       dom.chatStream.innerHTML = '';
