@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
+const path = require("path");
 
 const config = require("./config/env");
 const logger = require("./utils/logger.util");
@@ -57,7 +58,15 @@ app.use("/api/conversations", conversationRouter);
 app.use("/userInput", userInputRouter);
 app.use("/chatHistory", chatHistoryRouter);
 
+// Serve frontend static assets
+app.use("/css", express.static(path.join(__dirname, "../css")));
+app.use("/js", express.static(path.join(__dirname, "../js")));
+app.use("/assets", express.static(path.join(__dirname, "../assets")));
+
 app.get("/", (req, res) => {
+  if (req.accepts("html")) {
+    return res.sendFile(path.join(__dirname, "../index.html"));
+  }
   res.status(200).json({
     service: "nyaya-sahayak-express-gateway",
     status: "operational",
