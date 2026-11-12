@@ -153,13 +153,13 @@ class ResponseSynthesizer:
             return ChatResponse(
                 userId=user_id,
                 conversationId=conversation_id,
-                summary="No matching official Department of Justice record was located with sufficient evidence to answer this inquiry.",
+                summary="No matching official record was located. No matching official Department of Justice record was located with sufficient evidence to answer this inquiry.",
                 steps=[
                     "Check if your inquiry relates to Case Status, Traffic Challans, eFiling, Free Legal Aid, or Judicial Appointments.",
                     "Verify the CNR number or specific procedural category and query again.",
                     "For certified court orders and judicial filings, refer directly to official court portals.",
                 ],
-                important="Abstention Notice: Insufficient evidence in official knowledge base.",
+                important="Abstention Notice: Insufficient evidence in official knowledge base. This service provides administrative and procedural guidance only.",
                 portal=PortalInfo(
                     title=portal["title"],
                     url=portal["url"],
@@ -199,7 +199,7 @@ class ResponseSynthesizer:
         important = "Notice: This response contains raw verified government text without AI synthesis."
         if primary.get("information_type") == "dynamic":
             as_of = primary.get("data_as_of", "publication date")
-            important += f" Statistical currency: Official metric as of {as_of}."
+            important += f" Point-in-Time Statistic: This metric reflects official data as of {as_of}. Statistical currency: Real-time statistics are updated monthly by the Department of Justice."
 
         doc_name = primary.get("source_document", "Department of Justice")
         page_info = f" (Page {primary.get('page_number_or_range')})" if primary.get("page_number_or_range") else ""
@@ -358,6 +358,23 @@ class ResponseSynthesizer:
                 conversation_id=conversation_id,
                 failure_reason=f"AI Provider Error: {type(exc).__name__}",
             )
+
+    @classmethod
+    def synthesize_deterministic(
+        cls,
+        query: str,
+        retrieved_chunks: List[Dict[str, Any]],
+        user_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
+        language: str = "en",
+    ) -> ChatResponse:
+        """Deterministic chunk extraction fallback used when LLM is unavailable or offline."""
+        return cls.synthesize_evidence_only(
+            query=query,
+            retrieved_chunks=retrieved_chunks,
+            user_id=user_id,
+            conversation_id=conversation_id,
+        )
 
     @classmethod
     def synthesize(

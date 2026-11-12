@@ -25,8 +25,24 @@ for mod in [
     "qdrant_client.http",
     "qdrant_client.http.models",
 ]:
-    if mod not in sys.modules:
+    try:
+        __import__(mod)
+    except ImportError:
         sys.modules[mod] = MagicMock()
+
+import os
+# Ensure unit tests don't require external auth headers unless explicitly tested in test_auth.py
+os.environ["INTERNAL_SERVICE_TOKEN"] = ""
+os.environ["INTERNAL_AI_SECRET"] = ""
+
+
+@pytest.fixture(autouse=True)
+def clean_app_overrides():
+    """Ensure clean dependency overrides for each test."""
+    from app.main import app
+    app.dependency_overrides.clear()
+    yield
+    app.dependency_overrides.clear()
 
 
 def pytest_pyfunc_call(pyfuncitem):

@@ -29,7 +29,7 @@ class AIService {
     const headers = {
       "Content-Type": "application/json",
       "Accept": "application/json",
-      ...(config.internalAiSecret ? { "X-Internal-Secret": config.internalAiSecret } : {}),
+      ...(config.internalAiSecret ? { "X-Internal-Service-Key": config.internalAiSecret } : {}),
       ...(requestId ? { "X-Request-Id": requestId } : {}),
     };
 

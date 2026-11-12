@@ -83,6 +83,20 @@ def test_protected_endpoints_accept_valid_internal_service_key_header():
         assert resp.status_code == 200
 
 
+def test_protected_endpoints_accept_valid_internal_secret_header_fallback():
+    """Fallback X-Internal-Secret header also grants access."""
+    app.dependency_overrides[get_settings] = lambda: Settings(internal_service_token="test_secret_token_123")
+    client = TestClient(app)
+
+    with patch("app.services.retriever.KnowledgeRetriever.retrieve", return_value=[]):
+        resp = client.post(
+            "/api/v1/retrieve",
+            headers={"X-Internal-Secret": "test_secret_token_123"},
+            json={"query": "test query", "top_k": 2},
+        )
+        assert resp.status_code == 200
+
+
 def test_protected_endpoints_accept_valid_bearer_token():
     """Valid Authorization Bearer token grants access."""
     app.dependency_overrides[get_settings] = lambda: Settings(internal_service_token="test_secret_token_123")

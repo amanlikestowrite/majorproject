@@ -13,12 +13,14 @@ logger = logging.getLogger(__name__)
 
 async def verify_internal_token(
     x_internal_service_key: Optional[str] = Header(None, alias="X-Internal-Service-Key"),
+    x_internal_secret: Optional[str] = Header(None, alias="X-Internal-Secret"),
     authorization: Optional[str] = Header(None),
     settings: Settings = Depends(get_settings),
 ) -> None:
     """
     Validates that incoming requests contain the correct internal service token.
-    Supports either 'X-Internal-Service-Key: <token>' or 'Authorization: Bearer <token>'.
+    Supports standardized 'X-Internal-Service-Key: <token>', fallback 'X-Internal-Secret: <token>',
+    or 'Authorization: Bearer <token>'.
 
     Security model:
     - If no internal_service_token is configured (local dev mode), access is permitted.
@@ -32,6 +34,8 @@ async def verify_internal_token(
     provided_token = None
     if x_internal_service_key and x_internal_service_key.strip():
         provided_token = x_internal_service_key.strip()
+    elif x_internal_secret and x_internal_secret.strip():
+        provided_token = x_internal_secret.strip()
     elif authorization and authorization.strip():
         parts = authorization.strip().split(" ", 1)
         if len(parts) == 2 and parts[0].lower() == "bearer":

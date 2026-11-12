@@ -12,14 +12,14 @@
 ```mermaid
 flowchart LR
     Browser["Frontend Web App (Client)"] -- "Public HTTPS (CORS + Cookies)" --> Express["Express Gateway (Port 3000)"]
-    Express -- "Private Loopback + X-Internal-Secret" --> FastAPI["FastAPI AI Service (Port 8000)"]
+    Express -- "Private Loopback + X-Internal-Service-Key" --> FastAPI["FastAPI AI Service (Port 8000)"]
     FastAPI -- "Internal Disk (In-Process)" --> Qdrant["Embedded Qdrant (bge-m3)"]
     FastAPI -- "Server Key (GEMINI_API_KEY)" --> Gemini["Google Gemini 2.5 Flash"]
 ```
 
 ### Security Directives:
 1. **Never Expose Internal AI Endpoints:** The browser only ever talks to Express (`/api/chat`). FastAPI endpoints (`/api/v1/*`) are bound to internal loopback (`127.0.0.1`) and never reachable from the public internet.
-2. **Internal Gateway Authentication:** Every request sent from Express to FastAPI passes the `X-Internal-Secret` header configured via `INTERNAL_AI_SECRET`.
+2. **Internal Gateway Authentication:** Every request sent from Express to FastAPI passes the `X-Internal-Service-Key` header configured via `INTERNAL_AI_SECRET` (matching FastAPI's `INTERNAL_SERVICE_TOKEN`).
 3. **No Direct Google Gemini Keys in Express:** Express never holds `GEMINI_API_KEY`. Gemini API communication is encapsulated solely inside FastAPI.
 4. **Correlation Tracking:** Express generates a unique UUID `X-Request-Id` and passes it to FastAPI for unified log correlation.
 
@@ -33,7 +33,7 @@ POST /api/v1/chat HTTP/1.1
 Host: 127.0.0.1:8000
 Content-Type: application/json
 Accept: application/json
-X-Internal-Secret: <INTERNAL_AI_SECRET>
+X-Internal-Service-Key: <INTERNAL_AI_SECRET>
 X-Request-Id: 95b9bea5-a5da-439d-b599-d8b2184b8848
 ```
 

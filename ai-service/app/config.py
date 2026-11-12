@@ -36,6 +36,7 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices(
             "INTERNAL_SERVICE_TOKEN",
+            "INTERNAL_AI_SECRET",
             "INTERNAL_SERVICE_KEY",
             "AI_SERVICE_API_KEY",
             "internal_service_token",
