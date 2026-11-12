@@ -1,0 +1,541 @@
+/**
+ * Nyaya Sahayak — Citizen Authentication & Session Manager
+ * Connects frontend to Express Gateway auth and guest endpoints.
+ * Handles Google OAuth, Guest Sessions, and persistent session state.
+ */
+
+const AuthManager = (function () {
+  'use strict';
+
+  const STORAGE_KEYS = {
+    AUTH_TOKEN: 'nyaya_auth_token',
+    GUEST_TOKEN: 'nyaya_guest_token',
+    SESSION_TYPE: 'nyaya_session_type', // 'user' | 'guest' | 'none'
+    USER_DATA: 'nyaya_user_data',
+    GUEST_DATA: 'nyaya_guest_data',
+  };
+
+  const state = {
+    sessionType: 'none',
+    user: null,
+    guest: null,
+    authToken: null,
+    guestToken: null,
+    isLoading: false,
+  };
+
+  function getBaseUrl() {
+    if (window.NYAYA_API_BASE_URL) {
+      return window.NYAYA_API_BASE_URL.replace(/\/+$/, '');
+    }
+    // If served directly by Express gateway on port 3000, use relative paths
+    if (window.location.port === '3000' || window.location.hostname === 'localhost' && window.location.port === '3000') {
+      return '';
+    }
+    // Otherwise fallback to local gateway port 3000
+    return 'http://127.0.0.1:3000';
+  }
+
+  function getAuthHeaders() {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (state.sessionType === 'user' && state.authToken) {
+      headers['Authorization'] = `Bearer ${state.authToken}`;
+      headers['x-auth-token'] = state.authToken;
+    } else if (state.sessionType === 'guest' && state.guestToken) {
+      headers['x-guest-token'] = state.guestToken;
+      headers['Authorization'] = `Bearer ${state.guestToken}`;
+    }
+    return headers;
+  }
+
+  async function checkExistingSession() {
+    state.isLoading = true;
+    const storedAuthToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const storedGuestToken = localStorage.getItem(STORAGE_KEYS.GUEST_TOKEN);
+
+    // 1. Try restoring authenticated user session first
+    try {
+      const headers = { 'Accept': 'application/json' };
+      if (storedAuthToken) {
+        headers['Authorization'] = `Bearer ${storedAuthToken}`;
+        headers['x-auth-token'] = storedAuthToken;
+      }
+
+      const res = await fetch(`${getBaseUrl()}/api/auth/me`, {
+        method: 'GET',
+        headers,
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        const body = await res.json();
+        if (body.status === 'success' && body.data) {
+          state.sessionType = 'user';
+          state.user = body.data;
+          state.authToken = storedAuthToken;
+          localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'user');
+          localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(body.data));
+          updateNavbarUI();
+          state.isLoading = false;
+          return { type: 'user', user: body.data };
+        }
+      }
+    } catch (err) {
+      console.warn('Authentication check failed or server unreachable:', err.message);
+    }
+
+    // 2. If no user session, try validating existing guest session
+    if (storedGuestToken) {
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/guest/session`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'x-guest-token': storedGuestToken,
+            'Authorization': `Bearer ${storedGuestToken}`,
+          },
+          credentials: 'include',
+        });
+
+        if (res.ok) {
+          const body = await res.json();
+          if (body.status === 'success' && body.data && body.data.active) {
+            state.sessionType = 'guest';
+            state.guestToken = storedGuestToken;
+            state.guest = body.data;
+            localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'guest');
+            localStorage.setItem(STORAGE_KEYS.GUEST_DATA, JSON.stringify(body.data));
+            updateNavbarUI();
+            state.isLoading = false;
+            return { type: 'guest', guest: body.data };
+          }
+        } else {
+          // Token expired or invalid on server
+          localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
+        }
+      } catch (err) {
+        console.warn('Guest session check failed:', err.message);
+      }
+    }
+
+    state.sessionType = 'none';
+    state.user = null;
+    state.guest = null;
+    localStorage.removeItem(STORAGE_KEYS.SESSION_TYPE);
+    updateNavbarUI();
+    state.isLoading = false;
+    return { type: 'none' };
+  }
+
+  async function startGuestSession() {
+    state.isLoading = true;
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/guest/session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      const body = await res.json();
+      if (!res.ok || body.status !== 'success') {
+        throw new Error(body.message || 'Unable to initialize guest session.');
+      }
+
+      state.sessionType = 'guest';
+      state.guestToken = body.data.token;
+      state.guest = body.data;
+      state.user = null;
+      state.authToken = null;
+
+      localStorage.setItem(STORAGE_KEYS.GUEST_TOKEN, body.data.token);
+      localStorage.setItem(STORAGE_KEYS.GUEST_DATA, JSON.stringify(body.data));
+      localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'guest');
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+
+      updateNavbarUI();
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast('Citizen Guest Mode activated (24h ephemeral session)');
+      }
+      return body.data;
+    } catch (err) {
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast(err.message || 'Guest session error');
+      }
+      throw err;
+    } finally {
+      state.isLoading = false;
+    }
+  }
+
+  async function loginWithGoogle(idToken) {
+    if (!idToken || !idToken.trim()) {
+      throw new Error('A valid Google ID token is required.');
+    }
+    state.isLoading = true;
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ idToken: idToken.trim() }),
+      });
+
+      const body = await res.json();
+      if (!res.ok || body.status !== 'success') {
+        throw new Error(body.message || 'Google authentication failed.');
+      }
+
+      const { user, session } = body.data;
+      state.sessionType = 'user';
+      state.user = user;
+      state.authToken = session.token;
+      state.guest = null;
+      state.guestToken = null;
+
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, session.token);
+      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'user');
+      localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
+
+      updateNavbarUI();
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast(`Welcome, ${user.name || 'Citizen'}!`);
+      }
+      return user;
+    } catch (err) {
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast(err.message || 'Sign in error');
+      }
+      throw err;
+    } finally {
+      state.isLoading = false;
+    }
+  }
+
+  async function logout() {
+    state.isLoading = true;
+    try {
+      if (state.sessionType === 'user') {
+        const headers = { 'Accept': 'application/json' };
+        if (state.authToken) {
+          headers['Authorization'] = `Bearer ${state.authToken}`;
+        }
+        await fetch(`${getBaseUrl()}/api/auth/logout`, {
+          method: 'POST',
+          headers,
+          credentials: 'include',
+        });
+      }
+    } catch (err) {
+      console.warn('Logout request warning:', err);
+    } finally {
+      state.sessionType = 'none';
+      state.user = null;
+      state.guest = null;
+      state.authToken = null;
+      state.guestToken = null;
+
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.SESSION_TYPE);
+      localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+      localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
+
+      updateNavbarUI();
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast('You have been logged out.');
+      }
+      state.isLoading = false;
+    }
+  }
+
+  function updateNavbarUI() {
+    const navGuestBtn = document.getElementById('navGuestBtn');
+    const navLoginBtn = document.getElementById('navLoginBtn');
+    const navUserWidget = document.getElementById('navUserWidget');
+    const navUserAvatar = document.getElementById('navUserAvatar');
+    const navUserName = document.getElementById('navUserName');
+    const navSessionBadge = document.getElementById('navSessionBadge');
+
+    if (!navUserWidget) return;
+
+    if (state.sessionType === 'user' && state.user) {
+      if (navGuestBtn) navGuestBtn.style.display = 'none';
+      if (navLoginBtn) navLoginBtn.style.display = 'none';
+      navUserWidget.style.display = 'inline-flex';
+
+      const initial = (state.user.name || state.user.email || 'U').charAt(0).toUpperCase();
+      if (navUserAvatar) {
+        if (state.user.avatarUrl) {
+          navUserAvatar.innerHTML = `<img src="${state.user.avatarUrl}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        } else {
+          navUserAvatar.textContent = initial;
+        }
+      }
+      if (navUserName) {
+        navUserName.textContent = state.user.name || state.user.email || 'Citizen Account';
+      }
+      if (navSessionBadge) {
+        navSessionBadge.textContent = 'Verified';
+        navSessionBadge.className = 'navSessionBadge';
+      }
+    } else if (state.sessionType === 'guest' && state.guest) {
+      if (navGuestBtn) navGuestBtn.style.display = 'none';
+      if (navLoginBtn) navLoginBtn.style.display = 'inline-flex';
+      navUserWidget.style.display = 'inline-flex';
+
+      if (navUserAvatar) navUserAvatar.textContent = 'G';
+      if (navUserName) navUserName.textContent = 'Guest Citizen';
+      if (navSessionBadge) {
+        navSessionBadge.textContent = 'Guest';
+        navSessionBadge.className = 'navSessionBadge guestBadge';
+      }
+    } else {
+      if (navGuestBtn) navGuestBtn.style.display = 'inline-flex';
+      if (navLoginBtn) navLoginBtn.style.display = 'inline-flex';
+      navUserWidget.style.display = 'none';
+    }
+  }
+
+  const AuthModal = {
+    open(tab = 'signin') {
+      const backdrop = document.getElementById('authModalBackdrop');
+      if (!backdrop) return;
+      this.clearError();
+      const st = state.sessionType;
+      const tabBtnAccount = document.getElementById('tabBtnAccount');
+      if (tabBtnAccount) {
+        tabBtnAccount.style.display = (st !== 'none') ? 'inline-flex' : 'none';
+      }
+      if (st !== 'none' && tab === 'signin') {
+        this.switchTab('account');
+      } else {
+        this.switchTab(tab);
+      }
+      backdrop.classList.add('active');
+      backdrop.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    },
+
+    close() {
+      const backdrop = document.getElementById('authModalBackdrop');
+      if (!backdrop) return;
+      backdrop.classList.remove('active');
+      backdrop.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      this.clearError();
+    },
+
+    switchTab(tabName) {
+      const tabs = {
+        signin: { btn: document.getElementById('tabBtnSignIn'), panel: document.getElementById('panelSignIn') },
+        guest: { btn: document.getElementById('tabBtnGuest'), panel: document.getElementById('panelGuest') },
+        account: { btn: document.getElementById('tabBtnAccount'), panel: document.getElementById('panelAccount') },
+      };
+
+      Object.values(tabs).forEach(t => {
+        if (t.btn) {
+          t.btn.classList.remove('active');
+          t.btn.setAttribute('aria-selected', 'false');
+        }
+        if (t.panel) {
+          t.panel.classList.remove('active');
+        }
+      });
+
+      const target = tabs[tabName] || tabs.signin;
+      if (target.btn) {
+        target.btn.classList.add('active');
+        target.btn.setAttribute('aria-selected', 'true');
+      }
+      if (target.panel) {
+        target.panel.classList.add('active');
+      }
+
+      if (tabName === 'account') {
+        this.populateAccountPanel();
+      }
+    },
+
+    showError(msg) {
+      const box = document.getElementById('modalErrorBox');
+      if (box) {
+        box.textContent = msg;
+        box.style.display = 'block';
+      }
+    },
+
+    clearError() {
+      const box = document.getElementById('modalErrorBox');
+      if (box) {
+        box.textContent = '';
+        box.style.display = 'none';
+      }
+    },
+
+    populateAccountPanel() {
+      const avatar = document.getElementById('modalProfileAvatar');
+      const name = document.getElementById('modalProfileName');
+      const email = document.getElementById('modalProfileEmail');
+      const badge = document.getElementById('modalProfileBadge');
+      const expiry = document.getElementById('modalSessionExpiryNotice');
+
+      if (state.sessionType === 'user' && state.user) {
+        if (avatar) {
+          if (state.user.avatarUrl) {
+            avatar.innerHTML = `<img src="${state.user.avatarUrl}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+          } else {
+            avatar.textContent = (state.user.name || 'U').charAt(0).toUpperCase();
+          }
+        }
+        if (name) name.textContent = state.user.name || 'Citizen User';
+        if (email) email.textContent = state.user.email || 'Verified Google Account';
+        if (badge) {
+          badge.textContent = 'Verified Citizen Account';
+          badge.className = 'profileBadge';
+        }
+        if (expiry) expiry.textContent = 'Account Status: Active. Session token valid for 7 days with persistent history synchronization.';
+      } else if (state.sessionType === 'guest' && state.guest) {
+        if (avatar) avatar.textContent = 'G';
+        if (name) name.textContent = 'Guest Citizen';
+        if (email) email.textContent = 'Session ID: ' + (state.guest.sessionId ? state.guest.sessionId.slice(0, 12) + '...' : 'Active');
+        if (badge) {
+          badge.textContent = 'Ephemeral Guest (24 Hours)';
+          badge.className = 'profileBadge guest';
+        }
+        if (expiry) expiry.textContent = 'Guest Mode Notice: Inquiries remain private on this browser. Sessions expire after 24 hours of inactivity.';
+      }
+    },
+
+    initModalListeners() {
+      const backdrop = document.getElementById('authModalBackdrop');
+      const closeBtn = document.getElementById('authModalCloseBtn');
+      const tabSignIn = document.getElementById('tabBtnSignIn');
+      const tabGuest = document.getElementById('tabBtnGuest');
+      const tabAccount = document.getElementById('tabBtnAccount');
+      const tokenForm = document.getElementById('tokenAuthForm');
+      const startGuestBtn = document.getElementById('modalStartGuestBtn');
+      const logoutBtn = document.getElementById('modalLogoutBtn');
+      const googleBtn = document.getElementById('modalGoogleBtn');
+      const navUserWidget = document.getElementById('navUserWidget');
+
+      if (closeBtn) closeBtn.addEventListener('click', () => this.close());
+      if (backdrop) {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) this.close();
+        });
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && backdrop && backdrop.classList.contains('active')) {
+          this.close();
+        }
+      });
+
+      if (tabSignIn) tabSignIn.addEventListener('click', () => this.switchTab('signin'));
+      if (tabGuest) tabGuest.addEventListener('click', () => this.switchTab('guest'));
+      if (tabAccount) tabAccount.addEventListener('click', () => this.switchTab('account'));
+
+      if (startGuestBtn) {
+        startGuestBtn.addEventListener('click', async () => {
+          try {
+            startGuestBtn.disabled = true;
+            startGuestBtn.textContent = 'Initializing guest session...';
+            await startGuestSession();
+            this.close();
+          } catch (err) {
+            this.showError(err.message || 'Failed to start guest session.');
+          } finally {
+            startGuestBtn.disabled = false;
+            startGuestBtn.innerHTML = `
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Continue as Guest Citizen</span>
+            `;
+          }
+        });
+      }
+
+      if (tokenForm) {
+        tokenForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const input = document.getElementById('idTokenInput');
+          const submitBtn = document.getElementById('modalSubmitTokenBtn');
+          if (!input || !input.value.trim()) {
+            this.showError('Please enter a Google ID token.');
+            return;
+          }
+          try {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying token...';
+            await loginWithGoogle(input.value.trim());
+            input.value = '';
+            this.close();
+          } catch (err) {
+            this.showError(err.message || 'Verification failed. Please check the token.');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify & Sign In';
+          }
+        });
+      }
+
+      if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+          this.showError('Google OAuth: Enter or paste your Google ID token below, or click Guest Mode.');
+          const idInput = document.getElementById('idTokenInput');
+          if (idInput) idInput.focus();
+        });
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          try {
+            await logout();
+            this.close();
+          } catch (err) {
+            this.showError(err.message || 'Logout failed.');
+          }
+        });
+      }
+
+      if (navUserWidget) {
+        navUserWidget.addEventListener('click', () => {
+          this.open('account');
+        });
+      }
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    AuthModal.initModalListeners();
+    checkExistingSession();
+  });
+
+  window.AuthModal = AuthModal;
+
+  return {
+    getBaseUrl,
+    getAuthHeaders,
+    checkExistingSession,
+    startGuestSession,
+    loginWithGoogle,
+    logout,
+    getState: () => ({ ...state }),
+    updateNavbarUI,
+    openModal: (tab) => AuthModal.open(tab),
+  };
+})();

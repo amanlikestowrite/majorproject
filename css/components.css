@@ -882,3 +882,320 @@
   opacity: 1;
   pointer-events: auto;
 }
+
+/* ==========================================================================
+   Authentication & Citizen Profile Modal
+   ========================================================================== */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(13, 31, 53, 0.6);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  padding: 16px;
+}
+.modalBackdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.authModal {
+  background: var(--white);
+  border-radius: var(--radiusLarge);
+  box-shadow: var(--shadowModal);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transform: translateY(12px);
+  transition: transform 0.2s ease;
+}
+.modalBackdrop.active .authModal {
+  transform: translateY(0);
+}
+.modalHeader {
+  background: var(--ivory);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modalTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.modalTitle {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.modalCloseBtn {
+  background: transparent;
+  border: none;
+  color: var(--mutedText);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+.modalCloseBtn:hover {
+  color: var(--navy);
+  background: var(--navyTint);
+}
+.modalTabs {
+  display: flex;
+  background: var(--lightBg);
+  border-bottom: 1px solid var(--border);
+}
+.modalTabBtn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 11px 16px;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--mutedText);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.modalTabBtn.active {
+  background: var(--white);
+  color: var(--navy);
+  border-bottom-color: var(--saffron);
+}
+.modalTabPanel {
+  padding: 22px 20px;
+  display: none;
+}
+.modalTabPanel.active {
+  display: block;
+}
+.authInfoNotice {
+  background: var(--navyTint);
+  border-left: 3px solid var(--blue);
+  padding: 10px 14px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--navy);
+  margin-bottom: 18px;
+}
+.googleAuthBtn {
+  width: 100%;
+  background: var(--white);
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08);
+}
+.googleAuthBtn:hover {
+  background-color: #f8fafd;
+  border-color: #d2e3fc;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
+}
+.authDivider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0;
+  color: var(--mutedText);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.authDivider::before,
+.authDivider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+.authDivider span {
+  padding: 0 10px;
+}
+.formField {
+  margin-bottom: 14px;
+}
+.formLabel {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.formInput {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--text);
+  background: var(--white);
+  transition: border-color 0.15s;
+}
+.formInput:focus {
+  border-color: var(--navy);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(20, 43, 74, 0.1);
+}
+.formHelper {
+  font-size: 0.72rem;
+  color: var(--mutedText);
+  margin-top: 4px;
+}
+.modalSubmitBtn {
+  width: 100%;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.modalSubmitBtn:hover {
+  background: var(--deepNavy);
+}
+.modalErrorBox {
+  background: #FEF2F2;
+  border-left: 3px solid #EF4444;
+  color: #B91C1C;
+  padding: 9px 12px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.78rem;
+  margin-bottom: 14px;
+  display: none;
+}
+.profileCard {
+  background: var(--lightBg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.profileAvatarLarge {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.profileInfo {
+  flex: 1;
+  overflow: hidden;
+}
+.profileName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profileEmail {
+  font-size: 0.8rem;
+  color: var(--mutedText);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profileBadge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--greenTint);
+  color: var(--green);
+}
+.profileBadge.guest {
+  background: var(--saffronTint);
+  color: #B45309;
+}
+.guestFeatureList {
+  list-style: none;
+  margin: 14px 0 20px 0;
+}
+.guestFeatureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.guestFeatureItem svg {
+  color: var(--green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.logoutBtn {
+  width: 100%;
+  background: transparent;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius);
+  padding: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s;
+}
+.logoutBtn:hover {
+  background: #FEF2F2;
+  border-color: #F87171;
+}

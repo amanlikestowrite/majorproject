@@ -362,10 +362,18 @@
     guestTriggers.forEach(sel => {
       const btn = document.querySelector(sel);
       if (btn) {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           scrollToChatbot();
           if (dom.chatInput) dom.chatInput.focus();
-          UIInteractions.showToast('Citizen Guest Mode active — ask your judicial query below.');
+          if (window.AuthManager && window.AuthManager.getState().sessionType === 'none') {
+            try {
+              await window.AuthManager.startGuestSession();
+            } catch (err) {
+              console.warn('Guest initialization deferred to first chat message:', err);
+            }
+          } else {
+            UIInteractions.showToast('Citizen Guest Mode active — ask your judicial query below.');
+          }
         });
       }
     });
@@ -376,7 +384,7 @@
       if (btn) {
         btn.addEventListener('click', () => {
           if (window.AuthModal && typeof window.AuthModal.open === 'function') {
-            window.AuthModal.open();
+            window.AuthModal.open('signin');
           } else {
             UIInteractions.showToast('Citizen Sign In / Registration initialized');
           }
