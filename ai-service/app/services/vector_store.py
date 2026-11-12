@@ -36,7 +36,10 @@ class QdrantVectorStore:
         if not self.storage_path.is_absolute():
             self.storage_path = (SERVICE_DIR / self.storage_path).resolve()
         self.collection_name = self.settings.qdrant_collection_name
-        self.vector_dim = self.settings.embedding_dimension
+        if getattr(self.settings, "embedding_provider", "local") == "gemini":
+            self.vector_dim = getattr(self.settings, "gemini_embedding_dimension", 768)
+        else:
+            self.vector_dim = self.settings.embedding_dimension
 
         if client is not None:
             self.client = client
@@ -86,6 +89,13 @@ class QdrantVectorStore:
             self._create_payload_indices()
         else:
             logger.info("Collection '%s' already exists.", self.collection_name)
+            try:
+                coll_info = self.client.get_collection(collection_name=self.collection_name)
+                actual_size = getattr(coll_info.config.params.vectors, "size", None)
+                if isinstance(actual_size, int):
+                    self.vector_dim = actual_size
+            except Exception:
+                pass
 
     def _create_payload_indices(self) -> None:
         """Create indices on filterable payload fields."""

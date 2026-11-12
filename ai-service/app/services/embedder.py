@@ -10,7 +10,6 @@ import logging
 import os
 from typing import List, Optional, Union
 import numpy as np
-import torch
 
 from app.config import Settings, get_settings
 
@@ -24,21 +23,25 @@ os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 def resolve_device(preferred: str = "cpu") -> str:
     """Determine the optimal available compute device."""
     pref = preferred.lower().strip()
-    if pref in {"mps", "cuda", "cpu"}:
-        if pref == "mps" and torch.backends.mps.is_available():
-            return "mps"
-        if pref == "cuda" and torch.cuda.is_available():
-            return "cuda"
-        if pref == "cpu":
-            return "cpu"
-        logger.warning(
-            "Preferred device '%s' requested but not available. Falling back to CPU.",
-            pref,
-        )
+    try:
+        import torch
+        if pref in {"mps", "cuda", "cpu"}:
+            if pref == "mps" and torch.backends.mps.is_available():
+                return "mps"
+            if pref == "cuda" and torch.cuda.is_available():
+                return "cuda"
+            if pref == "cpu":
+                return "cpu"
+            logger.warning(
+                "Preferred device '%s' requested but not available. Falling back to CPU.",
+                pref,
+            )
 
-    if torch.cuda.is_available():
-        logger.info("NVIDIA CUDA hardware acceleration detected and enabled.")
-        return "cuda"
+        if torch.cuda.is_available():
+            logger.info("NVIDIA CUDA hardware acceleration detected and enabled.")
+            return "cuda"
+    except ImportError:
+        logger.warning("PyTorch not installed. Defaulting to CPU.")
 
     # CPU is the most stable and fast engine for BGE-M3 on macOS (~0.03s per chunk)
     return "cpu"

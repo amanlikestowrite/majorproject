@@ -8,6 +8,7 @@ with validation via Pydantic Settings.
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Optional
+from pydantic import Field, AliasChoices
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,10 +22,25 @@ class Settings(BaseSettings):
     """Application configuration and runtime settings."""
 
     # Server Configuration
-    ai_service_host: str = "127.0.0.1"
-    ai_service_port: int = 8000
+    ai_service_host: str = Field(
+        default="127.0.0.1",
+        validation_alias=AliasChoices("AI_SERVICE_HOST", "HOST", "ai_service_host"),
+    )
+    ai_service_port: int = Field(
+        default=8000,
+        validation_alias=AliasChoices("AI_SERVICE_PORT", "PORT", "ai_service_port"),
+    )
     environment: Literal["development", "staging", "production"] = "development"
     log_level: str = "INFO"
+    internal_service_token: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "INTERNAL_SERVICE_TOKEN",
+            "INTERNAL_SERVICE_KEY",
+            "AI_SERVICE_API_KEY",
+            "internal_service_token",
+        ),
+    )
 
     # Embedding Model Settings (BAAI/bge-m3 default)
     embedding_provider: Literal["local", "gemini", "huggingface"] = "local"
@@ -72,7 +88,7 @@ class Settings(BaseSettings):
 
     # Gemini RAG Generation Settings
     gemini_api_key: Optional[str] = None
-    gemini_model_name: str = "gemini-3.5-flash"
+    gemini_model_name: str = "gemini-3.5-flash-lite"
     gemini_temperature: float = 0.2
     gemini_max_output_tokens: int = 4096
     gemini_timeout_seconds: float = 30.0

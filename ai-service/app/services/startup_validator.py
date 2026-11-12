@@ -133,6 +133,14 @@ def validate_startup_configuration(settings: Optional[Settings] = None, qdrant_c
         logger.warning("Point count anomaly: collection '%s' contains %d points (expected 229).",
                        collection_name, actual_points)
 
+    # 4. Security Check: Warn if internal token is missing in cloud/production
+    if (mode == "cloud" or s.environment == "production") and not (s.internal_service_token and s.internal_service_token.strip()):
+        logger.warning(
+            "SECURITY WARNING: INTERNAL_SERVICE_TOKEN is not configured for %s environment. "
+            "Protected endpoints (/retrieve, /chat) will accept unauthenticated requests!",
+            s.environment,
+        )
+
     logger.info("Startup validation passed successfully! Collection '%s' is healthy (%d points, %d dims, %s).",
                 collection_name, actual_points, actual_dim, actual_distance)
 
