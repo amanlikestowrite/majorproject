@@ -1023,6 +1023,75 @@
   border-color: #d2e3fc;
   box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
 }
+.googleSignInWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+}
+.googleBtnContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.quickGuestBtn {
+  width: 100%;
+  background: var(--lightBg);
+  color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.quickGuestBtn:hover {
+  background: var(--navyTint);
+  border-color: var(--blue);
+  color: var(--navy);
+}
+.devAuthBanner {
+  margin-top: 16px;
+  padding: 12px;
+  background: #FFFBEB;
+  border: 1px dashed #F59E0B;
+  border-radius: var(--radius);
+}
+.devAuthNotice {
+  font-size: 0.76rem;
+  color: #92400E;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.devAuthNotice code {
+  background: rgba(245, 158, 11, 0.2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+.demoLoginBtn {
+  width: 100%;
+  background: #D97706;
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.demoLoginBtn:hover {
+  background: #B45309;
+}
 .authDivider {
   display: flex;
   align-items: center;
