@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: nyaya-sahayak-ai-service
+    env: python
+    rootDir: ai-service
+    plan: free
+    region: oregon
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: EMBEDDING_PROVIDER
+        value: gemini
+      - key: GEMINI_EMBEDDING_MODEL
+        value: gemini-embedding-001
+      - key: GEMINI_EMBEDDING_DIMENSION
+        value: 768
+      - key: VECTOR_STORE_TYPE
+        value: qdrant
+      - key: VECTOR_STORE_MODE
+        value: cloud
+      - key: QDRANT_COLLECTION_NAME
+        value: doj_gemini_768
+      - key: GEMINI_MODEL_NAME
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: INTERNAL_SERVICE_TOKEN
+        sync: false

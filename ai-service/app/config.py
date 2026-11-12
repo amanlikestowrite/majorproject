@@ -8,6 +8,7 @@ with validation via Pydantic Settings.
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Optional
+from pydantic import Field, AliasChoices
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,12 +22,29 @@ class Settings(BaseSettings):
     """Application configuration and runtime settings."""
 
     # Server Configuration
-    ai_service_host: str = "127.0.0.1"
-    ai_service_port: int = 8000
+    ai_service_host: str = Field(
+        default="127.0.0.1",
+        validation_alias=AliasChoices("AI_SERVICE_HOST", "HOST", "ai_service_host"),
+    )
+    ai_service_port: int = Field(
+        default=8000,
+        validation_alias=AliasChoices("AI_SERVICE_PORT", "PORT", "ai_service_port"),
+    )
     environment: Literal["development", "staging", "production"] = "development"
     log_level: str = "INFO"
+    internal_service_token: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "INTERNAL_SERVICE_TOKEN",
+            "INTERNAL_AI_SECRET",
+            "INTERNAL_SERVICE_KEY",
+            "AI_SERVICE_API_KEY",
+            "internal_service_token",
+        ),
+    )
 
     # Embedding Model Settings (BAAI/bge-m3 default)
+    embedding_provider: Literal["local", "gemini", "huggingface"] = "local"
     embedding_model_name: str = "BAAI/bge-m3"
     embedding_device: str = "cpu"  # 'cpu', 'mps', 'cuda', or 'auto'
     embedding_dimension: int = 1024
@@ -34,10 +52,24 @@ class Settings(BaseSettings):
     normalize_embeddings: bool = True
     embedding_max_length: int = 8192
 
-    # Vector Database Settings (Qdrant Embedded default)
+    # Google Gemini Hosted Embedding Settings
+    gemini_embedding_model: str = "gemini-embedding-001"
+    gemini_embedding_dimension: int = 768
+
+    # Hosted Hugging Face Inference Settings
+    hf_token: Optional[str] = None
+    hf_api_url: str = "https://router.huggingface.co/hf-inference/models/BAAI/bge-m3"
+    hf_timeout_seconds: float = 30.0
+    hf_max_retries: int = 3
+    hf_retry_delay_seconds: float = 2.0
+
+    # Vector Database Settings (Qdrant Embedded default / Cloud option)
     vector_store_type: Literal["qdrant", "chroma"] = "qdrant"
+    vector_store_mode: Literal["embedded", "cloud"] = "embedded"
     qdrant_storage_path: str = str(SERVICE_DIR / "qdrant_storage")
     qdrant_collection_name: str = "doj_knowledge_base"
+    qdrant_url: Optional[str] = None
+    qdrant_api_key: Optional[str] = None
     chroma_storage_path: str = str(SERVICE_DIR / "chroma_db")
 
     # Knowledge Base Data Paths
@@ -57,10 +89,10 @@ class Settings(BaseSettings):
 
     # Gemini RAG Generation Settings
     gemini_api_key: Optional[str] = None
-    gemini_model_name: str = "gemini-2.5-flash"
+    gemini_model_name: str = "gemini-3.5-flash-lite"
     gemini_temperature: float = 0.2
-    gemini_max_output_tokens: int = 1024
-    gemini_timeout_seconds: float = 15.0
+    gemini_max_output_tokens: int = 4096
+    gemini_timeout_seconds: float = 30.0
 
     model_config = SettingsConfigDict(
         env_file=str(SERVICE_DIR / ".env"),

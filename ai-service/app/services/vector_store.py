@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qmodels
 
-from app.config import Settings, get_settings
+from app.config import Settings, get_settings, SERVICE_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -24,23 +24,47 @@ def generate_point_id(chunk_id: str) -> str:
 
 
 class QdrantVectorStore:
-    """Local embedded Qdrant vector database interface."""
+    """Qdrant vector database interface supporting embedded and cloud deployments."""
 
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(
+        self,
+        settings: Optional[Settings] = None,
+        client: Optional[QdrantClient] = None,
+    ):
         self.settings = settings or get_settings()
         self.storage_path = Path(self.settings.qdrant_storage_path)
+        if not self.storage_path.is_absolute():
+            self.storage_path = (SERVICE_DIR / self.storage_path).resolve()
         self.collection_name = self.settings.qdrant_collection_name
-        self.vector_dim = self.settings.embedding_dimension
+        if getattr(self.settings, "embedding_provider", "local") == "gemini":
+            self.vector_dim = getattr(self.settings, "gemini_embedding_dimension", 768)
+        else:
+            self.vector_dim = self.settings.embedding_dimension
 
-        # Ensure local storage directory exists
-        self.storage_path.mkdir(parents=True, exist_ok=True)
+        if client is not None:
+            self.client = client
+            self.is_cloud = bool(getattr(self.settings, "vector_store_mode", "embedded") == "cloud" or self.settings.qdrant_url)
+        elif getattr(self.settings, "vector_store_mode", "embedded") == "cloud" and self.settings.qdrant_url:
+            logger.info(
+                "Initializing Qdrant Cloud client (collection: '%s')...",
+                self.collection_name,
+            )
+            self.client = QdrantClient(
+                url=self.settings.qdrant_url,
+                api_key=self.settings.qdrant_api_key,
+                check_compatibility=False,
+            )
+            self.is_cloud = True
+        else:
+            self.storage_path.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                "Initializing embedded Qdrant vector store at '%s' (collection: '%s')...",
+                self.storage_path,
+                self.collection_name,
+            )
+            self.client = QdrantClient(path=str(self.storage_path), force_disable_check_same_thread=True)
+            self.is_cloud = False
 
-        logger.info(
-            "Initializing embedded Qdrant vector store at '%s' (collection: '%s')...",
-            self.storage_path,
-            self.collection_name,
-        )
-        self.client = QdrantClient(path=str(self.storage_path), force_disable_check_same_thread=True)
         self._ensure_collection()
 
     def _ensure_collection(self) -> None:
@@ -65,6 +89,13 @@ class QdrantVectorStore:
             self._create_payload_indices()
         else:
             logger.info("Collection '%s' already exists.", self.collection_name)
+            try:
+                coll_info = self.client.get_collection(collection_name=self.collection_name)
+                actual_size = getattr(coll_info.config.params.vectors, "size", None)
+                if isinstance(actual_size, int):
+                    self.vector_dim = actual_size
+            except Exception:
+                pass
 
     def _create_payload_indices(self) -> None:
         """Create indices on filterable payload fields."""
@@ -147,6 +178,13 @@ class QdrantVectorStore:
         min_score: Optional[float] = None,
     ) -> List[Dict[str, Any]]:
         """Search for top_k nearest chunks with optional metadata filters."""
+        if len(query_vector) != self.vector_dim:
+            raise ValueError(
+                f"Query vector dimension mismatch: query has {len(query_vector)} dimensions, "
+                f"but collection '{self.collection_name}' requires {self.vector_dim} dimensions. "
+                f"Verify that EMBEDDING_PROVIDER matches vector store configuration."
+            )
+
         filter_conditions = []
 
         if topic:
@@ -189,24 +227,31 @@ class QdrantVectorStore:
 
     def get_stats(self) -> Dict[str, Any]:
         """Return diagnostic metrics for the collection."""
+        mode = "cloud" if getattr(self, "is_cloud", False) else "embedded"
+        target_path = (
+            self.settings.qdrant_url
+            if getattr(self, "is_cloud", False)
+            else str(self.storage_path)
+        )
         try:
             info = self.client.get_collection(collection_name=self.collection_name)
             return {
                 "engine": "qdrant",
-                "mode": "embedded",
+                "mode": mode,
                 "collection": self.collection_name,
                 "total_indexed_chunks": info.points_count,
                 "status": str(info.status),
                 "vector_dimension": self.vector_dim,
-                "storage_path": str(self.storage_path),
+                "storage_path": target_path,
             }
         except Exception as exc:
             return {
                 "engine": "qdrant",
-                "mode": "embedded",
+                "mode": mode,
                 "collection": self.collection_name,
                 "total_indexed_chunks": 0,
                 "status": f"uninitialized: {exc}",
                 "vector_dimension": self.vector_dim,
+                "storage_path": target_path,
             }
 

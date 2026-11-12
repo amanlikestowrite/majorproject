@@ -10,7 +10,6 @@ import logging
 import os
 from typing import List, Optional, Union
 import numpy as np
-import torch
 
 from app.config import Settings, get_settings
 
@@ -24,21 +23,25 @@ os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 def resolve_device(preferred: str = "cpu") -> str:
     """Determine the optimal available compute device."""
     pref = preferred.lower().strip()
-    if pref in {"mps", "cuda", "cpu"}:
-        if pref == "mps" and torch.backends.mps.is_available():
-            return "mps"
-        if pref == "cuda" and torch.cuda.is_available():
-            return "cuda"
-        if pref == "cpu":
-            return "cpu"
-        logger.warning(
-            "Preferred device '%s' requested but not available. Falling back to CPU.",
-            pref,
-        )
+    try:
+        import torch
+        if pref in {"mps", "cuda", "cpu"}:
+            if pref == "mps" and torch.backends.mps.is_available():
+                return "mps"
+            if pref == "cuda" and torch.cuda.is_available():
+                return "cuda"
+            if pref == "cpu":
+                return "cpu"
+            logger.warning(
+                "Preferred device '%s' requested but not available. Falling back to CPU.",
+                pref,
+            )
 
-    if torch.cuda.is_available():
-        logger.info("NVIDIA CUDA hardware acceleration detected and enabled.")
-        return "cuda"
+        if torch.cuda.is_available():
+            logger.info("NVIDIA CUDA hardware acceleration detected and enabled.")
+            return "cuda"
+    except ImportError:
+        logger.warning("PyTorch not installed. Defaulting to CPU.")
 
     # CPU is the most stable and fast engine for BGE-M3 on macOS (~0.03s per chunk)
     return "cpu"
@@ -172,10 +175,62 @@ class EmbeddingService:
         """Diagnostic metadata regarding model name, compute device, and vector dimension."""
         return {
             "model_name": self.loader.model_name,
+            "provider": "local",
             "device": self.loader.device,
             "dimension": self.expected_dim,
             "is_loaded": self.loader.is_loaded,
             "batch_size": self.batch_size,
             "normalized": self.normalize,
         }
+
+
+# Import hosted and Gemini provider components
+from app.services.providers.hosted_embedder import (
+    HostedBgeM3EmbeddingService,
+    HostedEmbeddingError,
+    HostedAuthError,
+    HostedModelLoadingError,
+    HostedQuotaExhaustedError,
+    HostedPaymentRequiredError,
+    HostedTimeoutError,
+    HostedDimensionMismatchError,
+)
+from app.services.providers.gemini_embedder import (
+    GeminiEmbeddingService,
+    GeminiEmbeddingError,
+    GeminiAuthError,
+    GeminiQuotaExhaustedError,
+    GeminiTimeoutError,
+    GeminiDimensionMismatchError,
+    GeminiInvalidInputError,
+)
+
+
+def get_embedding_service(
+    settings: Optional[Settings] = None,
+) -> Union[EmbeddingService, HostedBgeM3EmbeddingService, GeminiEmbeddingService]:
+    """
+    Factory function returning either local, Hugging Face hosted, or Google Gemini
+    embedding service based on application configuration (EMBEDDING_PROVIDER).
+    """
+    s = settings or get_settings()
+    provider = getattr(s, "embedding_provider", "local").lower().strip()
+
+    if provider in {"gemini", "google"}:
+        logger.info(
+            "Initializing Google Gemini Embedding Service (model: %s, dim: %d)...",
+            s.gemini_embedding_model,
+            s.gemini_embedding_dimension,
+        )
+        return GeminiEmbeddingService(settings=s)
+
+    if provider in {"huggingface", "hosted"}:
+        logger.info(
+            "Initializing Hosted BGE-M3 Embedding Service (endpoint: %s)...",
+            s.hf_api_url,
+        )
+        return HostedBgeM3EmbeddingService(settings=s)
+
+    logger.info("Initializing Local BGE-M3 Embedding Service (device: %s)...", s.embedding_device)
+    return EmbeddingService(settings=s)
 
