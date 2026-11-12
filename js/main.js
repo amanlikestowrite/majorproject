@@ -356,6 +356,33 @@
         handleUserQuery(spokenText);
       }
     });
+
+    // Guest & Auth navigation listeners
+    const guestTriggers = ['#navGuestBtn', '#mobileGuestBtn', '#heroGuestBtn', '#footerGuestLink'];
+    guestTriggers.forEach(sel => {
+      const btn = document.querySelector(sel);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          scrollToChatbot();
+          if (dom.chatInput) dom.chatInput.focus();
+          UIInteractions.showToast('Citizen Guest Mode active — ask your judicial query below.');
+        });
+      }
+    });
+
+    const loginTriggers = ['#navLoginBtn', '#mobileLoginBtn', '#heroLoginBtn'];
+    loginTriggers.forEach(sel => {
+      const btn = document.querySelector(sel);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          if (window.AuthModal && typeof window.AuthModal.open === 'function') {
+            window.AuthModal.open();
+          } else {
+            UIInteractions.showToast('Citizen Sign In / Registration initialized');
+          }
+        });
+      }
+    });
   }
   function scrollToChatbot() {
     const el = document.getElementById('chatbot');

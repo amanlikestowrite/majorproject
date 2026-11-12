@@ -53,7 +53,51 @@
             <li><a href="#chatbot" class="navLink">Virtual Assistant</a></li>
             <li><a href="#services" class="navLink">Services</a></li>
             <li><a href="#about" class="navLink">About DoJ</a></li>
+            <li class="mobileAuthItem">
+              <button type="button" class="navBtn navBtnGhost mobileNavBtn" id="mobileGuestBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Continue as Guest</span>
+              </button>
+            </li>
+            <li class="mobileAuthItem">
+              <button type="button" class="navBtn navBtnPrimary mobileNavBtn" id="mobileLoginBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                  <polyline points="10 17 15 12 10 7"></polyline>
+                  <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                <span>Sign In</span>
+              </button>
+            </li>
           </ul>
+          <div class="navAuthGroup" id="navAuthGroup">
+            <button type="button" class="navBtn navBtnGhost" id="navGuestBtn" title="Use application without an account">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Guest Mode</span>
+            </button>
+            <button type="button" class="navBtn navBtnPrimary" id="navLoginBtn" title="Sign in with your Google account">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+              <span>Sign In</span>
+            </button>
+            <div class="navUserWidget" id="navUserWidget" title="Account profile and settings" aria-haspopup="true">
+              <div class="navUserAvatar" id="navUserAvatar">G</div>
+              <span class="navUserName" id="navUserName">Guest Citizen</span>
+              <span class="navSessionBadge guestBadge" id="navSessionBadge">Guest</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </div>
           <button type="button" class="menuToggle" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -76,8 +120,65 @@
           Justice begins with the <em>right information.</em>
         </h1>
         <p class="heroText">
-          Your trusted digital assistant for understanding India's judicial system, navigating court procedures, and finding verified information from the Department of Justice.
+          Official AI-powered judicial assistance portal by the Department of Justice, Ministry of Law &amp; Justice, Government of India. Guiding citizens through court procedures, case tracking, free legal aid, and verified statutory records.
         </p>
+
+        <div class="heroFeaturesGrid">
+          <div class="heroFeatureCard">
+            <div class="heroFeatureIcon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <div>
+              <div class="heroFeatureTitle">Legal Information Assistance</div>
+              <div class="heroFeatureDesc">Plain-language guidance on court processes and CNR case tracking.</div>
+            </div>
+          </div>
+
+          <div class="heroFeatureCard">
+            <div class="heroFeatureIcon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="heroFeatureTitle">AI-Powered Legal Guidance</div>
+              <div class="heroFeatureDesc">Strictly grounded legal intelligence powered by Google Gemini and vector retrieval.</div>
+            </div>
+          </div>
+
+          <div class="heroFeatureCard">
+            <div class="heroFeatureIcon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+              </svg>
+            </div>
+            <div>
+              <div class="heroFeatureTitle">Official Sources &amp; Citations</div>
+              <div class="heroFeatureDesc">100% traceable to Ministry acts, eCourts manuals, and NALSA statutory rules.</div>
+            </div>
+          </div>
+
+          <div class="heroFeatureCard">
+            <div class="heroFeatureIcon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </div>
+            <div>
+              <div class="heroFeatureTitle">Easy Citizen Services Access</div>
+              <div class="heroFeatureDesc">Instant routing to eFiling 3.0, Virtual Courts, and Tele-Law 2.0.</div>
+            </div>
+          </div>
+        </div>
+
         <div class="searchBox">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"></circle>
@@ -105,6 +206,16 @@
           </svg>
           <span>Official Department of Justice virtual assistant. Reliable judicial guidance.</span>
         </div>
+
+        <div class="heroDisclaimerBanner" role="note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heroDisclaimerIcon" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <div>
+            <strong>Official Legal Information Notice:</strong> Nyaya Sahayak provides procedural guidance and factual legal information sourced directly from official Department of Justice documentation. It does not provide professional legal representation, advocacy, or binding judicial orders. For certified court filings or legal representation, consult a qualified advocate or your District Legal Services Authority (DLSA).
+          </div>
+        </div>
+
         <div class="actions">
           <a href="#chatbot" id="startChatBtn" class="primaryBtn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -112,8 +223,23 @@
             </svg>
             <span>Start a Conversation</span>
           </a>
+          <button type="button" id="heroGuestBtn" class="guestBtn" title="Continue using Nyaya Sahayak without an account">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>Continue as Guest</span>
+          </button>
+          <button type="button" id="heroLoginBtn" class="secondaryBtn" title="Sign in with your Google account">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <span>Sign In / Register</span>
+          </button>
           <a href="#services" id="exploreBtn" class="secondaryBtn">
-            <span>Explore Common Questions</span>
+            <span>Explore Services</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
@@ -540,7 +666,7 @@
             <li><a href="#chatbot">Virtual Assistant</a></li>
             <li><a href="#services">Citizen Services</a></li>
             <li><a href="#about">About Department of Justice</a></li>
-            <li><a href="#services">Judicial Statistics</a></li>
+            <li><a href="#chatbot" id="footerGuestLink">Citizen Guest Mode</a></li>
           </ul>
         </div>
         <div class="footerCol">
