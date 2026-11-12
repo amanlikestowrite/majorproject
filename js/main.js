@@ -333,6 +333,9 @@
           localStorage.setItem('nyaya_guest_token', resBody.guestToken);
           window.AuthManager.checkExistingSession();
         }
+        if (window.ConversationManager) {
+          window.ConversationManager.fetchConversations();
+        }
 
         if (dom.typingIndicator) dom.typingIndicator.style.display = 'none';
         renderAssistantResponse(resBody.data);
@@ -493,6 +496,13 @@
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
+  window.renderAssistantResponse = renderAssistantResponse;
+  window.resetToNewConversation = resetToNewConversation;
+  Object.defineProperty(window, 'activeConversationId', {
+    get: () => activeConversationId,
+    set: (val) => { activeConversationId = val; },
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
     UIInteractions.setupMobileMenu();
     UIInteractions.setupSmoothScroll();

@@ -441,6 +441,13 @@
             </span>
           </div>
           <div class="chatActions">
+            <button type="button" class="chatBtn" id="toggleHistoryBtn" title="Toggle inquiry history sidebar" aria-label="Toggle history sidebar">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>History</span>
+            </button>
             <button type="button" class="chatBtn" id="newChatBtn" title="Start new conversation" aria-label="Start new conversation">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -450,7 +457,24 @@
             </button>
           </div>
         </div>
-        <div class="chatViewport" id="chatViewport" role="log" aria-live="polite">
+        <div class="chatBody">
+          <aside class="chatSidebar" id="chatSidebar" aria-label="Inquiry History">
+            <div class="sidebarHeader">
+              <span class="sidebarTitle">Inquiry History</span>
+              <button type="button" class="sidebarNewBtn" id="sidebarNewChatBtn" title="Start new inquiry">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>New</span>
+              </button>
+            </div>
+            <div class="conversationList" id="conversationList">
+              <!-- Dynamically populated from /api/conversations -->
+            </div>
+          </aside>
+          <div class="chatMain">
+            <div class="chatViewport" id="chatViewport" role="log" aria-live="polite">
           <div class="emptyState" id="emptyState">
             <span class="emptyBadge">Department of Justice</span>
             <br>
@@ -551,7 +575,8 @@
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
   <div class="container">
     <div class="divider" aria-hidden="true">
       <div class="dividerDiamond"></div>
@@ -853,6 +878,7 @@
   <script src="js/chatbot.js"></script>
   <script src="js/interactions.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/conversations.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

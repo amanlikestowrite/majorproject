@@ -1332,3 +1332,169 @@
   background: #FFE4E6;
   border-color: #FB7185;
 }
+
+/* ==========================================================================
+   Conversation History Sidebar
+   ========================================================================== */
+.chatBody {
+  display: flex;
+  position: relative;
+  min-height: 560px;
+}
+.chatSidebar {
+  width: 250px;
+  min-width: 250px;
+  background: var(--lightBg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, min-width 0.25s ease, opacity 0.25s ease;
+  overflow: hidden;
+  z-index: 10;
+}
+.chatSidebar.collapsed {
+  width: 0;
+  min-width: 0;
+  border-right: none;
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebarHeader {
+  padding: 12px 14px;
+  background: var(--ivory);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebarTitle {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sidebarNewBtn {
+  background: var(--navyTint);
+  color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.sidebarNewBtn:hover {
+  background: var(--navy);
+  color: var(--white);
+  border-color: var(--navy);
+}
+.conversationList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.convItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--white);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  gap: 6px;
+}
+.convItem:hover {
+  border-color: var(--blue);
+  background: var(--navyTint);
+}
+.convItem.active {
+  border-color: var(--saffron);
+  background: var(--saffronTint);
+  border-left: 3px solid var(--saffron);
+}
+.convItemContent {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.convItemTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.convItemDate {
+  font-size: 0.68rem;
+  color: var(--mutedText);
+}
+.convDeleteBtn {
+  background: transparent;
+  border: none;
+  color: var(--mutedText);
+  padding: 4px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.convDeleteBtn:hover {
+  color: #DC2626;
+  background: #FEE2E2;
+  opacity: 1;
+}
+.convEmptyState {
+  padding: 24px 14px;
+  text-align: center;
+  color: var(--mutedText);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.convLoadingState {
+  padding: 24px 14px;
+  text-align: center;
+  color: var(--mutedText);
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.convSpinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.chatMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
