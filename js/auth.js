@@ -89,6 +89,16 @@ const AuthManager = (function () {
 
     // 2. If no user session, try validating existing guest session
     if (storedGuestToken) {
+      if (storedGuestToken.startsWith('local-guest-')) {
+        const storedGuestData = localStorage.getItem(STORAGE_KEYS.GUEST_DATA);
+        state.sessionType = 'guest';
+        state.guestToken = storedGuestToken;
+        state.guest = storedGuestData ? JSON.parse(storedGuestData) : { active: true, sessionId: 'local' };
+        updateNavbarUI();
+        state.isLoading = false;
+        return { type: 'guest', guest: state.guest };
+      }
+
       try {
         const res = await fetch(`${getBaseUrl()}/api/guest/session`, {
           method: 'GET',
@@ -134,28 +144,46 @@ const AuthManager = (function () {
   async function startGuestSession() {
     state.isLoading = true;
     try {
-      const res = await fetch(`${getBaseUrl()}/api/guest/session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-      });
+      let guestData = null;
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/guest/session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'include',
+        });
 
-      const body = await res.json();
-      if (!res.ok || body.status !== 'success') {
-        throw new Error(body.message || 'Unable to initialize guest session.');
+        if (res.ok) {
+          const body = await res.json();
+          if (body.status === 'success' && body.data) {
+            guestData = body.data;
+          }
+        }
+      } catch (networkErr) {
+        console.warn('Backend guest endpoint error, falling back to local ephemeral guest mode:', networkErr.message);
+      }
+
+      // If backend database is offline or endpoint unavailable, provide local ephemeral guest session
+      if (!guestData) {
+        const localToken = 'local-guest-' + Math.random().toString(36).substring(2, 10) + Date.now();
+        guestData = {
+          token: localToken,
+          sessionId: 'local-' + Date.now().toString(36),
+          active: true,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        };
       }
 
       state.sessionType = 'guest';
-      state.guestToken = body.data.token;
-      state.guest = body.data;
+      state.guestToken = guestData.token;
+      state.guest = guestData;
       state.user = null;
       state.authToken = null;
 
-      localStorage.setItem(STORAGE_KEYS.GUEST_TOKEN, body.data.token);
-      localStorage.setItem(STORAGE_KEYS.GUEST_DATA, JSON.stringify(body.data));
+      localStorage.setItem(STORAGE_KEYS.GUEST_TOKEN, guestData.token);
+      localStorage.setItem(STORAGE_KEYS.GUEST_DATA, JSON.stringify(guestData));
       localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'guest');
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
@@ -164,7 +192,7 @@ const AuthManager = (function () {
       if (window.UIInteractions && window.UIInteractions.showToast) {
         window.UIInteractions.showToast('Citizen Guest Mode activated (24h ephemeral session)');
       }
-      return body.data;
+      return guestData;
     } catch (err) {
       if (window.UIInteractions && window.UIInteractions.showToast) {
         window.UIInteractions.showToast(err.message || 'Guest session error');
