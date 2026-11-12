@@ -13,6 +13,7 @@ __pycache__/
 .cache/
 .tiktoken_cache/
 huggingface/
+*_cache.json
 *.bin
 *.safetensors
 *.onnx

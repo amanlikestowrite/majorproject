@@ -9,7 +9,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from app.config import Settings, get_settings
-from app.services.embedder import EmbeddingService
+from app.services.embedder import EmbeddingService, get_embedding_service
 from app.services.vector_store import QdrantVectorStore
 
 logger = logging.getLogger(__name__)
@@ -20,12 +20,12 @@ class KnowledgeRetriever:
 
     def __init__(
         self,
-        embedder: Optional[EmbeddingService] = None,
+        embedder: Optional[Any] = None,
         vector_store: Optional[QdrantVectorStore] = None,
         settings: Optional[Settings] = None,
     ):
         self.settings = settings or get_settings()
-        self.embedder = embedder or EmbeddingService(settings=self.settings)
+        self.embedder = embedder or get_embedding_service(settings=self.settings)
         self.vector_store = vector_store or QdrantVectorStore(settings=self.settings)
 
     def retrieve(

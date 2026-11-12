@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.api.v1.router import api_v1_router
+from app.services.startup_validator import validate_startup_configuration
 
 settings = get_settings()
 
@@ -26,8 +27,13 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing Nyaya Sahayak AI Service...")
     logger.info("Environment: %s", settings.environment)
     logger.info("Host: %s, Port: %d", settings.ai_service_host, settings.ai_service_port)
-    logger.info("Embedding Model: %s", settings.embedding_model_name)
-    logger.info("Vector Store: %s (path: %s)", settings.vector_store_type, settings.qdrant_storage_path)
+    logger.info("Embedding Provider: %s", settings.embedding_provider)
+    logger.info("Vector Store Mode: %s", getattr(settings, "vector_store_mode", "embedded"))
+    logger.info("Target Collection: %s", settings.qdrant_collection_name)
+
+    # Perform startup validation (dimension, collection existence, and provider safety)
+    validate_startup_configuration(settings)
+
     yield
     logger.info("Shutting down Nyaya Sahayak AI Service.")
 

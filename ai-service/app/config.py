@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # Embedding Model Settings (BAAI/bge-m3 default)
+    embedding_provider: Literal["local", "gemini", "huggingface"] = "local"
     embedding_model_name: str = "BAAI/bge-m3"
     embedding_device: str = "cpu"  # 'cpu', 'mps', 'cuda', or 'auto'
     embedding_dimension: int = 1024
@@ -34,10 +35,24 @@ class Settings(BaseSettings):
     normalize_embeddings: bool = True
     embedding_max_length: int = 8192
 
-    # Vector Database Settings (Qdrant Embedded default)
+    # Google Gemini Hosted Embedding Settings
+    gemini_embedding_model: str = "gemini-embedding-001"
+    gemini_embedding_dimension: int = 768
+
+    # Hosted Hugging Face Inference Settings
+    hf_token: Optional[str] = None
+    hf_api_url: str = "https://router.huggingface.co/hf-inference/models/BAAI/bge-m3"
+    hf_timeout_seconds: float = 30.0
+    hf_max_retries: int = 3
+    hf_retry_delay_seconds: float = 2.0
+
+    # Vector Database Settings (Qdrant Embedded default / Cloud option)
     vector_store_type: Literal["qdrant", "chroma"] = "qdrant"
+    vector_store_mode: Literal["embedded", "cloud"] = "embedded"
     qdrant_storage_path: str = str(SERVICE_DIR / "qdrant_storage")
     qdrant_collection_name: str = "doj_knowledge_base"
+    qdrant_url: Optional[str] = None
+    qdrant_api_key: Optional[str] = None
     chroma_storage_path: str = str(SERVICE_DIR / "chroma_db")
 
     # Knowledge Base Data Paths

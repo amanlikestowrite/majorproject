@@ -172,10 +172,62 @@ class EmbeddingService:
         """Diagnostic metadata regarding model name, compute device, and vector dimension."""
         return {
             "model_name": self.loader.model_name,
+            "provider": "local",
             "device": self.loader.device,
             "dimension": self.expected_dim,
             "is_loaded": self.loader.is_loaded,
             "batch_size": self.batch_size,
             "normalized": self.normalize,
         }
+
+
+# Import hosted and Gemini provider components
+from app.services.providers.hosted_embedder import (
+    HostedBgeM3EmbeddingService,
+    HostedEmbeddingError,
+    HostedAuthError,
+    HostedModelLoadingError,
+    HostedQuotaExhaustedError,
+    HostedPaymentRequiredError,
+    HostedTimeoutError,
+    HostedDimensionMismatchError,
+)
+from app.services.providers.gemini_embedder import (
+    GeminiEmbeddingService,
+    GeminiEmbeddingError,
+    GeminiAuthError,
+    GeminiQuotaExhaustedError,
+    GeminiTimeoutError,
+    GeminiDimensionMismatchError,
+    GeminiInvalidInputError,
+)
+
+
+def get_embedding_service(
+    settings: Optional[Settings] = None,
+) -> Union[EmbeddingService, HostedBgeM3EmbeddingService, GeminiEmbeddingService]:
+    """
+    Factory function returning either local, Hugging Face hosted, or Google Gemini
+    embedding service based on application configuration (EMBEDDING_PROVIDER).
+    """
+    s = settings or get_settings()
+    provider = getattr(s, "embedding_provider", "local").lower().strip()
+
+    if provider in {"gemini", "google"}:
+        logger.info(
+            "Initializing Google Gemini Embedding Service (model: %s, dim: %d)...",
+            s.gemini_embedding_model,
+            s.gemini_embedding_dimension,
+        )
+        return GeminiEmbeddingService(settings=s)
+
+    if provider in {"huggingface", "hosted"}:
+        logger.info(
+            "Initializing Hosted BGE-M3 Embedding Service (endpoint: %s)...",
+            s.hf_api_url,
+        )
+        return HostedBgeM3EmbeddingService(settings=s)
+
+    logger.info("Initializing Local BGE-M3 Embedding Service (device: %s)...", s.embedding_device)
+    return EmbeddingService(settings=s)
 

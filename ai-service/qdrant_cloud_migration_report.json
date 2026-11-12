@@ -1,0 +1,119 @@
+{
+  "migration": {
+    "target_collection": "doj_gemini_768",
+    "points_count": 229,
+    "vector_size": 768,
+    "distance": "Cosine",
+    "status": "green"
+  },
+  "retrieval": {
+    "recall_at_1": 77.78,
+    "recall_at_3": 88.89,
+    "recall_at_5": 100.0,
+    "mrr": 0.8426,
+    "avg_embed_latency_ms": 539.3,
+    "avg_cloud_search_latency_ms": 274.4,
+    "avg_combined_latency_ms": 813.7,
+    "cases": [
+      {
+        "case_id": 1,
+        "domain": "Live-streaming rules",
+        "rank": 1,
+        "top_1_id": "DOJ_STAT_RULE_LIVESTREAM_R008_R009",
+        "top_1_score": 0.752,
+        "embed_ms": 650.8,
+        "search_ms": 1046.7,
+        "total_ms": 1697.4,
+        "match": "Acceptable"
+      },
+      {
+        "case_id": 2,
+        "domain": "eCourts & eFiling",
+        "rank": 1,
+        "top_1_id": "DOJ_STAT_PROC_EFILING_REGISTRATION_CORE",
+        "top_1_score": 0.7055,
+        "embed_ms": 523.5,
+        "search_ms": 168.4,
+        "total_ms": 691.9,
+        "match": "Exact"
+      },
+      {
+        "case_id": 3,
+        "domain": "Judicial Appointments (Parliament)",
+        "rank": 1,
+        "top_1_id": "DOJ_STAT_PARL_LS17_STAR_35_0001",
+        "top_1_score": 0.823,
+        "embed_ms": 506.8,
+        "search_ms": 167.4,
+        "total_ms": 674.2,
+        "match": "Exact"
+      },
+      {
+        "case_id": 4,
+        "domain": "Tele-Law Legal Aid",
+        "rank": 3,
+        "top_1_id": "DOJ_STAT_FAQ_0028",
+        "top_1_score": 0.772,
+        "embed_ms": 501.2,
+        "search_ms": 227.8,
+        "total_ms": 729.0,
+        "match": "Acceptable"
+      },
+      {
+        "case_id": 5,
+        "domain": "NJDG Pendency",
+        "rank": 1,
+        "top_1_id": "DOJ_DYN_STAT_NJDG_DISTRICT_20261108",
+        "top_1_score": 0.8074,
+        "embed_ms": 530.2,
+        "search_ms": 165.9,
+        "total_ms": 696.1,
+        "match": "Exact"
+      },
+      {
+        "case_id": 6,
+        "domain": "Judicial Vacancies Summary",
+        "rank": 1,
+        "top_1_id": "DOJ_STAT_FAQ_0056",
+        "top_1_score": 0.8037,
+        "embed_ms": 468.1,
+        "search_ms": 165.8,
+        "total_ms": 633.9,
+        "match": "Acceptable"
+      },
+      {
+        "case_id": 7,
+        "domain": "High Court Vacancy Matrix",
+        "rank": 4,
+        "top_1_id": "DOJ_HIST_BENCHMARK_DOJ_VACANCY_STATEMENT_SEPTEMBER_2025",
+        "top_1_score": 0.7869,
+        "embed_ms": 573.2,
+        "search_ms": 195.3,
+        "total_ms": 768.5,
+        "match": "Acceptable"
+      },
+      {
+        "case_id": 8,
+        "domain": "Virtual Courts Challan",
+        "rank": 1,
+        "top_1_id": "DOJ_STAT_FAQ_0002",
+        "top_1_score": 0.8013,
+        "embed_ms": 624.4,
+        "search_ms": 166.5,
+        "total_ms": 791.0,
+        "match": "Acceptable"
+      },
+      {
+        "case_id": 9,
+        "domain": "Fast Track Special Courts",
+        "rank": 1,
+        "top_1_id": "DOJ_STAT_FAQ_0055",
+        "top_1_score": 0.8138,
+        "embed_ms": 475.7,
+        "search_ms": 165.9,
+        "total_ms": 641.6,
+        "match": "Exact"
+      }
+    ]
+  }
+}
