@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const prisma = require("../../prisma/lib/prisma");
 const { AIService } = require("../services/ai.service");
 const SessionService = require("../services/session.service");
+const ConversationController = require("./conversation.controller");
 const logger = require("../utils/logger.util");
 
 class ChatController {
@@ -35,9 +36,14 @@ class ChatController {
       let conversation = null;
 
       if (conversationId) {
-        conversation = await prisma.conversation.findUnique({
-          where: { id: conversationId },
-        });
+        try {
+          conversation = await prisma.conversation.findUnique({
+            where: { id: conversationId },
+          });
+        } catch (dbErr) {
+          const store = ConversationController.getInMemoryStore();
+          conversation = store.get(conversationId) || null;
+        }
 
         if (!conversation) {
           return res.status(404).json({
@@ -62,14 +68,30 @@ class ChatController {
         const words = message.split(/\s+/).slice(0, 6).join(" ");
         const title = words.length > 50 ? `${words.slice(0, 47)}...` : words;
 
-        conversation = await prisma.conversation.create({
-          data: {
+        try {
+          conversation = await prisma.conversation.create({
+            data: {
+              userId: activeUserId,
+              guestSessionId: activeGuestId,
+              title: title || "Legal Inquiry",
+              expiresAt: guestSession ? guestSession.expiresAt : null,
+            },
+          });
+        } catch (dbErr) {
+          console.warn("Database unavailable during conversation creation, using memory:", dbErr.message);
+          conversation = {
+            id: "mem-conv-" + Math.random().toString(36).substring(2, 10),
             userId: activeUserId,
             guestSessionId: activeGuestId,
             title: title || "Legal Inquiry",
+            createdAt: new Date(),
+            updatedAt: new Date(),
             expiresAt: guestSession ? guestSession.expiresAt : null,
-          },
-        });
+            messages: [],
+          };
+          const store = ConversationController.getInMemoryStore();
+          store.set(conversation.id, conversation);
+        }
       }
 
       const aiResponse = await AIService.getGuidance({
@@ -84,63 +106,91 @@ class ChatController {
 
       const latencyMs = Date.now() - startTime;
 
-      const [userMsg, assistantMsg] = await prisma.$transaction(async (tx) => {
-        const uMsg = await tx.message.create({
-          data: {
-            conversationId: conversation.id,
-            userId: activeUserId,
-            role: "user",
-            content: message,
-          },
-        });
+      let userMsg = null;
+      let assistantMsg = null;
 
-        const aMsg = await tx.message.create({
-          data: {
-            conversationId: conversation.id,
-            userId: activeUserId,
-            role: "assistant",
-            content: aiResponse.summary || "Legal assistance guidance",
-            structuredResponse: aiResponse,
-          },
-        });
+      try {
+        const [uMsg, aMsg] = await prisma.$transaction(async (tx) => {
+          const u = await tx.message.create({
+            data: {
+              conversationId: conversation.id,
+              userId: activeUserId,
+              role: "user",
+              content: message,
+            },
+          });
 
-        if (Array.isArray(aiResponse.citations) && aiResponse.citations.length > 0) {
-          for (const cit of aiResponse.citations) {
-            await tx.messageCitation.create({
-              data: {
-                messageId: aMsg.id,
-                chunkId: cit.chunk_id || "OFFICIAL_CHUNK",
-                sourceDocument: cit.document || cit.source_document || "Official DoJ Document",
-                sourceUrl: cit.source_url || "https://doj.gov.in",
-                pageRange: cit.page_range || cit.page_number_or_range || null,
-                fidelityClassification: cit.fidelity_classification || "verbatim",
-                publicationDate: cit.publication_date || null,
-                dataAsOf: cit.data_as_of || null,
-              },
-            });
+          const a = await tx.message.create({
+            data: {
+              conversationId: conversation.id,
+              userId: activeUserId,
+              role: "assistant",
+              content: aiResponse.summary || "Legal assistance guidance",
+              structuredResponse: aiResponse,
+            },
+          });
+
+          if (Array.isArray(aiResponse.citations) && aiResponse.citations.length > 0) {
+            for (const cit of aiResponse.citations) {
+              await tx.messageCitation.create({
+                data: {
+                  messageId: a.id,
+                  chunkId: cit.chunk_id || "OFFICIAL_CHUNK",
+                  sourceDocument: cit.document || cit.source_document || "Official DoJ Document",
+                  sourceUrl: cit.source_url || "https://doj.gov.in",
+                  pageRange: cit.page_range || cit.page_number_or_range || null,
+                  fidelityClassification: cit.fidelity_classification || "verbatim",
+                  publicationDate: cit.publication_date || null,
+                  dataAsOf: cit.data_as_of || null,
+                },
+              });
+            }
           }
-        }
 
-        await tx.conversation.update({
-          where: { id: conversation.id },
-          data: { updatedAt: new Date() },
+          await tx.conversation.update({
+            where: { id: conversation.id },
+            data: { updatedAt: new Date() },
+          });
+
+          await tx.aIRequestLog.create({
+            data: {
+              userId: activeUserId,
+              guestSessionId: activeGuestId,
+              conversationId: conversation.id,
+              provider: "fastapi/gemini",
+              model: "gemini-2.5-flash",
+              status: "success",
+              latencyMs,
+              tokenCount: null,
+            },
+          });
+
+          return [u, a];
         });
-
-        await tx.aIRequestLog.create({
-          data: {
-            userId: activeUserId,
-            guestSessionId: activeGuestId,
-            conversationId: conversation.id,
-            provider: "fastapi/gemini",
-            model: "gemini-2.5-flash",
-            status: "success",
-            latencyMs,
-            tokenCount: null,
-          },
-        });
-
-        return [uMsg, aMsg];
-      });
+        userMsg = uMsg;
+        assistantMsg = aMsg;
+      } catch (txErr) {
+        console.warn("Database unavailable for persisting messages, keeping in memory:", txErr.message);
+        userMsg = {
+          id: "mem-msg-" + Math.random().toString(36).substring(2, 10),
+          conversationId: conversation.id,
+          role: "user",
+          content: message,
+          createdAt: new Date(),
+        };
+        assistantMsg = {
+          id: "mem-msg-" + Math.random().toString(36).substring(2, 10),
+          conversationId: conversation.id,
+          role: "assistant",
+          content: aiResponse.summary || "Legal assistance guidance",
+          structuredResponse: aiResponse,
+          citations: aiResponse.citations || [],
+          createdAt: new Date(),
+        };
+        if (!conversation.messages) conversation.messages = [];
+        conversation.messages.push(userMsg, assistantMsg);
+        conversation.updatedAt = new Date();
+      }
 
       return res.status(200).json({
         status: "success",

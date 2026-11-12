@@ -9,50 +9,56 @@ class AuthController {
       const idToken = req.idToken;
       const verifiedProfile = await googleAuthService.verifyIdToken(idToken);
 
-      let user = await prisma.user.findUnique({
-        where: { googleSub: verifiedProfile.googleSub },
-      });
+      let user = null;
+      try {
+        user = await prisma.user.findUnique({
+          where: { googleSub: verifiedProfile.googleSub },
+        });
 
-      if (!user) {
-        if (verifiedProfile.email) {
-          const existingByEmail = await prisma.user.findUnique({
-            where: { email: verifiedProfile.email },
-          });
+        if (!user) {
+          if (verifiedProfile.email) {
+            const existingByEmail = await prisma.user.findUnique({
+              where: { email: verifiedProfile.email },
+            });
 
-          if (existingByEmail) {
-            user = await prisma.user.update({
-              where: { id: existingByEmail.id },
+            if (existingByEmail) {
+              user = await prisma.user.update({
+                where: { id: existingByEmail.id },
+                data: {
+                  googleSub: verifiedProfile.googleSub,
+                  name: verifiedProfile.name || existingByEmail.name,
+                  avatarUrl: verifiedProfile.avatarUrl || existingByEmail.avatarUrl,
+                },
+              });
+            }
+          }
+
+          if (!user) {
+            user = await prisma.user.create({
               data: {
                 googleSub: verifiedProfile.googleSub,
-                name: verifiedProfile.name || existingByEmail.name,
-                avatarUrl: verifiedProfile.avatarUrl || existingByEmail.avatarUrl,
+                email: verifiedProfile.email,
+                name: verifiedProfile.name,
+                avatarUrl: verifiedProfile.avatarUrl,
               },
             });
           }
-        }
-
-        if (!user) {
-          user = await prisma.user.create({
+        } else {
+          user = await prisma.user.update({
+            where: { id: user.id },
             data: {
-              googleSub: verifiedProfile.googleSub,
-              email: verifiedProfile.email,
-              name: verifiedProfile.name,
-              avatarUrl: verifiedProfile.avatarUrl,
+              name: verifiedProfile.name || user.name,
+              avatarUrl: verifiedProfile.avatarUrl || user.avatarUrl,
+              email: verifiedProfile.email || user.email,
             },
           });
         }
-      } else {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            name: verifiedProfile.name || user.name,
-            avatarUrl: verifiedProfile.avatarUrl || user.avatarUrl,
-            email: verifiedProfile.email || user.email,
-          },
-        });
+      } catch (dbErr) {
+        console.warn("Database unavailable during user lookup/create, using in-memory store:", dbErr.message);
+        user = SessionService.getOrCreateInMemoryUser(verifiedProfile);
       }
 
-      const { authSession, rawToken } = await SessionService.createAuthSession(user.id);
+      const { authSession, rawToken } = await SessionService.createAuthSession(user.id, user);
 
       res.cookie("nyaya_auth_token", rawToken, {
         httpOnly: true,
