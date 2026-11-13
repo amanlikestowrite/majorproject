@@ -386,7 +386,7 @@ textarea:focus-visible {
   font-weight: 400;
   color: var(--navy);
   line-height: 1.18;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.02em;
   margin-bottom: 16px;
 }
 .heroTitle em {
