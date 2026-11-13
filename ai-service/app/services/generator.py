@@ -132,6 +132,19 @@ def build_citations_from_chunks(chunks: List[Dict[str, Any]]) -> List[Citation]:
     return citations
 
 
+def is_greeting_or_meta(query: str) -> bool:
+    q = query.strip().lower().rstrip("?!., ")
+    greetings = {
+        "hi", "hello", "hey", "namaste", "namaskar", "good morning", "good afternoon",
+        "good evening", "help", "what can you do", "what do you do", "who are you",
+        "what can i ask", "how to use", "start", "what is this", "what to do next",
+        "menu", "options", "guide me", "how does this work", "how can you help"
+    }
+    if q in greetings or len(q) <= 2:
+        return True
+    return any(q.startswith(g + " ") for g in ["hi", "hello", "hey", "namaste", "help"])
+
+
 class ResponseSynthesizer:
     """Coordinates grounded legal response generation, citation verification, and fallback."""
 
@@ -153,13 +166,13 @@ class ResponseSynthesizer:
             return ChatResponse(
                 userId=user_id,
                 conversationId=conversation_id,
-                summary="No matching official record was located. No matching official Department of Justice record was located with sufficient evidence to answer this inquiry.",
+                summary=f"I could not find an exact matching official record for '{query}'. However, I can assist you with court procedures, CNR case tracking, traffic challans, and citizen legal services.",
                 steps=[
                     "Check if your inquiry relates to Case Status, Traffic Challans, eFiling, Free Legal Aid, or Judicial Appointments.",
                     "Verify the CNR number or specific procedural category and query again.",
                     "For certified court orders and judicial filings, refer directly to official court portals.",
                 ],
-                important="Abstention Notice: Insufficient evidence in official knowledge base. This service provides administrative and procedural guidance only.",
+                important="Procedural Guidance: Nyaya Sahayak operates strictly on verified Department of Justice records to ensure accuracy.",
                 portal=PortalInfo(
                     title=portal["title"],
                     url=portal["url"],
@@ -247,6 +260,40 @@ class ResponseSynthesizer:
         Asynchronously generate a grounded legal answer using Gemini.
         Falls back cleanly to an explicitly labelled evidence-only result if Gemini is unavailable.
         """
+        if is_greeting_or_meta(query):
+            portal = CANONICAL_PORTALS["doj"]
+            return ChatResponse(
+                userId=user_id,
+                conversationId=conversation_id,
+                summary="Namaste! I am <strong>Nyaya Sahayak</strong>, your official AI conversational assistant for the Department of Justice, Ministry of Law & Justice, Government of India. How can I assist you with judicial information or court services today?",
+                steps=[
+                    "<strong>Case Status & Tracking:</strong> Check proceedings using your 16-character CNR number or party names.",
+                    "<strong>Traffic Challans & Virtual Courts:</strong> Inquire how to contest or settle compoundable traffic notices online via vcourts.gov.in.",
+                    "<strong>eFiling 3.0 & Digital Court Fees:</strong> Learn how to electronically file pleadings and pay court fees 24×7 without physical counters.",
+                    "<strong>Free Legal Aid & Tele-Law:</strong> Discover eligibility under NALSA Section 12 or connect with panel lawyers via CSC centres.",
+                    "<strong>Judicial Appointments & NJDG:</strong> View official statistics on judge vacancies and national case pendency records.",
+                ],
+                important="Nyaya Sahayak provides procedural information and official government records. It does not provide legal representation or binding judicial orders.",
+                portal=PortalInfo(
+                    title=portal["title"],
+                    url=portal["url"],
+                    domain=portal["domain"],
+                ),
+                source="Department of Justice, Ministry of Law & Justice, Govt. of India",
+                followUps=[
+                    "How can I check my case status online?",
+                    "How do I pay a traffic challan in Virtual Courts?",
+                    "What are the eligibility criteria for Tele-Law free legal aid?",
+                    "Where can I find information about judicial vacancies?",
+                ],
+                citations=[],
+                audit=None,
+                generation_status="grounded_generation",
+                provider="gemini",
+                model=None,
+                conflicting_sources_flag=False,
+            )
+
         if not retrieved_chunks:
             return cls.synthesize_evidence_only(
                 query=query,

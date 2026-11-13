@@ -305,7 +305,6 @@
       const payload = {
         message: cleanQuery,
         language: 'en',
-        topic: 'General Judicial Guidance',
         top_k: 3,
       };
       if (activeConversationId) {
