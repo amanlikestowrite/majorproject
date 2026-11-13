@@ -60,6 +60,9 @@ class AuthController {
 
       const { authSession, rawToken } = await SessionService.createAuthSession(user.id, user);
 
+      res.clearCookie("nyaya_guest_token", { path: "/" });
+      res.cookie("nyaya_guest_token", "", { path: "/", expires: new Date(0), maxAge: 0 });
+
       res.cookie("nyaya_auth_token", rawToken, {
         httpOnly: true,
         secure: config.nodeEnv === "production",

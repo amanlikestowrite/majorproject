@@ -463,9 +463,12 @@
         btn.addEventListener('click', async () => {
           scrollToChatbot();
           if (dom.chatInput) dom.chatInput.focus();
-          if (window.AuthManager && window.AuthManager.getState().sessionType === 'none') {
+          const currentSessionType = window.AuthManager ? window.AuthManager.getState().sessionType : 'none';
+          if (currentSessionType !== 'guest') {
             try {
-              await window.AuthManager.startGuestSession();
+              if (window.AuthManager) {
+                await window.AuthManager.startGuestSession();
+              }
             } catch (err) {
               console.warn('Guest initialization deferred to first chat message:', err);
             }

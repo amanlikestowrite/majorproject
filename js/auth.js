@@ -164,6 +164,21 @@ const AuthManager = (function () {
   async function startGuestSession() {
     state.isLoading = true;
     try {
+      // 1. Immediately wipe any user auth tokens, cookies, and chat state
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+      document.cookie = 'nyaya_auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+
+      // 2. Clear conversation sidebar immediately so old user conversations disappear
+      if (window.ConversationManager && typeof window.ConversationManager.clearState === 'function') {
+        window.ConversationManager.clearState();
+      }
+
+      // 3. Reset chat viewport so user doesn't see old conversation messages
+      if (typeof window.resetToNewConversation === 'function') {
+        window.resetToNewConversation(true);
+      }
+
       let guestData = null;
       try {
         const res = await fetch(`${getBaseUrl()}/api/guest/session`, {
@@ -232,6 +247,15 @@ const AuthManager = (function () {
     }
     state.isLoading = true;
     try {
+      // Clean up any guest cookies or residual chat state
+      document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+      if (window.ConversationManager && typeof window.ConversationManager.clearState === 'function') {
+        window.ConversationManager.clearState();
+      }
+      if (typeof window.resetToNewConversation === 'function') {
+        window.resetToNewConversation(true);
+      }
+
       const res = await fetch(`${getBaseUrl()}/api/auth/google`, {
         method: 'POST',
         headers: {
