@@ -1431,7 +1431,6 @@
 }
 .sidebarHeader {
   padding: 12px 14px;
-  background: var(--ivory);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -1440,7 +1439,7 @@
 .sidebarTitle {
   font-size: 0.76rem;
   font-weight: 700;
-  color: var(--navy);
+  color: black;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
