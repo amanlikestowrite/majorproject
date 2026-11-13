@@ -187,7 +187,7 @@ class QdrantVectorStore:
 
         filter_conditions = []
 
-        if topic:
+        if topic and topic.strip().lower() not in {"general judicial guidance", "general", "all", "none"}:
             filter_conditions.append(
                 qmodels.FieldCondition(
                     key="topic",

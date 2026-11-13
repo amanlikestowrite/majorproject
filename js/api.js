@@ -8,13 +8,14 @@ const API = (function () {
     guestSessionId = sessionId;
     if (token) {
       localStorage.setItem("nyaya_guest_token", token);
+      if (sessionId) localStorage.setItem("nyaya_guest_session_id", sessionId);
+      authToken = null;
+      localStorage.removeItem("nyaya_auth_token");
+      document.cookie = 'nyaya_auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
     } else {
       localStorage.removeItem("nyaya_guest_token");
-    }
-    if (sessionId) {
-      localStorage.setItem("nyaya_guest_session_id", sessionId);
-    } else {
       localStorage.removeItem("nyaya_guest_session_id");
+      document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
     }
   }
 
@@ -22,19 +23,28 @@ const API = (function () {
     authToken = token;
     if (token) {
       localStorage.setItem("nyaya_auth_token", token);
+      guestToken = null;
+      guestSessionId = null;
+      localStorage.removeItem("nyaya_guest_token");
+      localStorage.removeItem("nyaya_guest_session_id");
+      document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
     } else {
       localStorage.removeItem("nyaya_auth_token");
+      document.cookie = 'nyaya_auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
     }
   }
 
   function getAuthHeaders() {
     const headers = {
       "Content-Type": "application/json",
+      "Accept": "application/json",
     };
     if (authToken) {
       headers["Authorization"] = `Bearer ${authToken}`;
+      headers["x-auth-token"] = authToken;
     } else if (guestToken) {
       headers["x-guest-token"] = guestToken;
+      headers["Authorization"] = `Bearer ${guestToken}`;
     }
     return headers;
   }
@@ -149,6 +159,8 @@ const API = (function () {
     } finally {
       setAuthToken(null);
       setGuestToken(null, null);
+      document.cookie = 'nyaya_auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+      document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
     }
   }
 

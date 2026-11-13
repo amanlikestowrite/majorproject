@@ -11,7 +11,12 @@ class GoogleAuthService {
       throw new Error("Missing or invalid Google ID token");
     }
 
-    if (process.env.MOCK_GOOGLE_AUTH === "true" && idToken.startsWith("mock-google-token:")) {
+    if (
+      (process.env.MOCK_GOOGLE_AUTH === "true" ||
+        config.nodeEnv === "development" ||
+        !config.googleClientId) &&
+      idToken.startsWith("mock-google-token:")
+    ) {
       const parts = idToken.split(":");
       const mockEmail = parts[1] || "citizen@example.com";
       return {

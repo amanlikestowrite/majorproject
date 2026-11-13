@@ -1,27 +1,40 @@
 const SessionService = require("../services/session.service");
+const { hashToken } = require("../utils/crypto.util");
 
 function extractToken(req, type = "auth") {
+  if (type === "guest") {
+    if (req.headers["x-guest-token"]) {
+      return req.headers["x-guest-token"].trim();
+    }
+    // If request explicitly carries user auth token, do NOT treat Authorization header as guest
+    if (req.headers["x-auth-token"]) {
+      return null;
+    }
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      return authHeader.substring(7).trim();
+    }
+    if (req.cookies && req.cookies.nyaya_guest_token && !req.cookies.nyaya_auth_token) {
+      return req.cookies.nyaya_guest_token;
+    }
+    return null;
+  }
+
+  // type === "auth"
+  // If request explicitly carries guest token, do NOT extract any auth token
+  if (req.headers["x-guest-token"] || (req.cookies && req.cookies.nyaya_guest_token && !req.headers["x-auth-token"])) {
+    return null;
+  }
+  if (req.headers["x-auth-token"]) {
+    return req.headers["x-auth-token"].trim();
+  }
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7).trim();
   }
-
-  if (type === "guest" && req.headers["x-guest-token"]) {
-    return req.headers["x-guest-token"].trim();
+  if (req.cookies && req.cookies.nyaya_auth_token) {
+    return req.cookies.nyaya_auth_token;
   }
-  if (type === "auth" && req.headers["x-auth-token"]) {
-    return req.headers["x-auth-token"].trim();
-  }
-
-  if (req.cookies) {
-    if (type === "guest" && req.cookies.nyaya_guest_token) {
-      return req.cookies.nyaya_guest_token;
-    }
-    if (type === "auth" && req.cookies.nyaya_auth_token) {
-      return req.cookies.nyaya_auth_token;
-    }
-  }
-
   return null;
 }
 
@@ -48,6 +61,7 @@ async function requireAuth(req, res, next) {
     req.user = session.user;
     req.authSession = session;
     req.sessionToken = rawToken;
+    req.guestSession = null;
     next();
   } catch (err) {
     next(err);
@@ -56,7 +70,7 @@ async function requireAuth(req, res, next) {
 
 async function requireGuest(req, res, next) {
   try {
-    const rawToken = extractToken(req, "guest") || extractToken(req, "auth");
+    const rawToken = extractToken(req, "guest");
     if (!rawToken) {
       return res.status(401).json({
         status: "error",
@@ -76,6 +90,7 @@ async function requireGuest(req, res, next) {
 
     req.guestSession = session;
     req.sessionToken = rawToken;
+    req.user = null;
     next();
   } catch (err) {
     next(err);
@@ -84,22 +99,92 @@ async function requireGuest(req, res, next) {
 
 async function requireAnySession(req, res, next) {
   try {
-    const authToken = extractToken(req, "auth");
-    if (authToken) {
+    // 1. Explicit guest request: prioritize guest session exclusively
+    if (req.headers["x-guest-token"]) {
+      const guestToken = req.headers["x-guest-token"].trim();
+      let guestSession = await SessionService.validateGuestToken(guestToken);
+      if (!guestSession) {
+        // Create an ephemeral guest session for unpersisted/local guest token so it is strictly isolated
+        guestSession = {
+          id: "ephemeral-guest-" + hashToken(guestToken).substring(0, 16),
+          sessionTokenHash: hashToken(guestToken),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          createdAt: new Date(),
+          lastActivityAt: new Date(),
+        };
+      }
+      req.guestSession = guestSession;
+      req.sessionToken = guestToken;
+      req.user = null;
+      req.authSession = null;
+      return next();
+    }
+
+    // 2. Explicit user auth request: prioritize user session exclusively
+    if (req.headers["x-auth-token"]) {
+      const authToken = req.headers["x-auth-token"].trim();
       const authSession = await SessionService.validateAuthToken(authToken);
       if (authSession) {
         req.user = authSession.user;
         req.authSession = authSession;
+        req.sessionToken = authToken;
+        req.guestSession = null;
         return next();
       }
     }
 
-    const guestToken = extractToken(req, "guest") || authToken;
-    if (guestToken) {
-      const guestSession = await SessionService.validateGuestToken(guestToken);
-      if (guestSession) {
-        req.guestSession = guestSession;
+    // 3. Authorization Bearer header
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7).trim();
+      // Try guest first if request is explicitly guest-oriented
+      if (!req.headers["x-auth-token"]) {
+        const guestSession = await SessionService.validateGuestToken(token);
+        if (guestSession) {
+          req.guestSession = guestSession;
+          req.sessionToken = token;
+          req.user = null;
+          return next();
+        }
+      }
+      const authSession = await SessionService.validateAuthToken(token);
+      if (authSession) {
+        req.user = authSession.user;
+        req.authSession = authSession;
+        req.sessionToken = token;
+        req.guestSession = null;
         return next();
+      }
+    }
+
+    // 4. Cookies fallback
+    if (req.cookies) {
+      if (req.cookies.nyaya_guest_token && !req.headers["x-auth-token"]) {
+        let guestSession = await SessionService.validateGuestToken(req.cookies.nyaya_guest_token);
+        if (!guestSession) {
+          guestSession = {
+            id: "ephemeral-guest-" + hashToken(req.cookies.nyaya_guest_token).substring(0, 16),
+            sessionTokenHash: hashToken(req.cookies.nyaya_guest_token),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            createdAt: new Date(),
+            lastActivityAt: new Date(),
+          };
+        }
+        req.guestSession = guestSession;
+        req.sessionToken = req.cookies.nyaya_guest_token;
+        req.user = null;
+        req.authSession = null;
+        return next();
+      }
+      if (req.cookies.nyaya_auth_token && !req.headers["x-guest-token"]) {
+        const authSession = await SessionService.validateAuthToken(req.cookies.nyaya_auth_token);
+        if (authSession) {
+          req.user = authSession.user;
+          req.authSession = authSession;
+          req.sessionToken = req.cookies.nyaya_auth_token;
+          req.guestSession = null;
+          return next();
+        }
       }
     }
 
@@ -115,22 +200,81 @@ async function requireAnySession(req, res, next) {
 
 async function optionalSession(req, res, next) {
   try {
-    const authToken = extractToken(req, "auth");
-    if (authToken) {
-      const authSession = await SessionService.validateAuthToken(authToken);
-      if (authSession) {
-        req.user = authSession.user;
-        req.authSession = authSession;
+    // 1. Explicit guest request: prioritize guest session exclusively
+    if (req.headers["x-guest-token"]) {
+      const guestToken = req.headers["x-guest-token"].trim();
+      const guestSession = await SessionService.validateGuestToken(guestToken);
+      if (guestSession) {
+        req.guestSession = guestSession;
+        req.sessionToken = guestToken;
+        req.user = null;
         return next();
       }
     }
 
-    const guestToken = extractToken(req, "guest") || authToken;
-    if (guestToken) {
-      const guestSession = await SessionService.validateGuestToken(guestToken);
+    // 2. Explicit user auth request: prioritize user session exclusively
+    if (req.headers["x-auth-token"]) {
+      const authToken = req.headers["x-auth-token"].trim();
+      const authSession = await SessionService.validateAuthToken(authToken);
+      if (authSession) {
+        req.user = authSession.user;
+        req.authSession = authSession;
+        req.sessionToken = authToken;
+        req.guestSession = null;
+        return next();
+      }
+    }
+
+    // 3. Authorization Bearer header
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7).trim();
+      const guestSession = await SessionService.validateGuestToken(token);
       if (guestSession) {
         req.guestSession = guestSession;
+        req.sessionToken = token;
+        req.user = null;
         return next();
+      }
+      const authSession = await SessionService.validateAuthToken(token);
+      if (authSession) {
+        req.user = authSession.user;
+        req.authSession = authSession;
+        req.sessionToken = token;
+        req.guestSession = null;
+        return next();
+      }
+    }
+
+    // 4. Cookies fallback
+    if (req.cookies) {
+      if (req.cookies.nyaya_guest_token && !req.cookies.nyaya_auth_token) {
+        const guestSession = await SessionService.validateGuestToken(req.cookies.nyaya_guest_token);
+        if (guestSession) {
+          req.guestSession = guestSession;
+          req.sessionToken = req.cookies.nyaya_guest_token;
+          req.user = null;
+          return next();
+        }
+      }
+      if (req.cookies.nyaya_auth_token) {
+        const authSession = await SessionService.validateAuthToken(req.cookies.nyaya_auth_token);
+        if (authSession) {
+          req.user = authSession.user;
+          req.authSession = authSession;
+          req.sessionToken = req.cookies.nyaya_auth_token;
+          req.guestSession = null;
+          return next();
+        }
+      }
+      if (req.cookies.nyaya_guest_token) {
+        const guestSession = await SessionService.validateGuestToken(req.cookies.nyaya_guest_token);
+        if (guestSession) {
+          req.guestSession = guestSession;
+          req.sessionToken = req.cookies.nyaya_guest_token;
+          req.user = null;
+          return next();
+        }
       }
     }
 

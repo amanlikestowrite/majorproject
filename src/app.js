@@ -58,6 +58,10 @@ app.use("/api/conversations", conversationRouter);
 app.use("/userInput", userInputRouter);
 app.use("/chatHistory", chatHistoryRouter);
 
+// Serve frontend static assets
+app.use("/css", express.static(path.join(__dirname, "../css")));
+app.use("/js", express.static(path.join(__dirname, "../js")));
+app.use("/assets", express.static(path.join(__dirname, "../assets")));
 app.use(express.static(path.join(__dirname, "..")));
 
 app.get("/", (req, res) => {

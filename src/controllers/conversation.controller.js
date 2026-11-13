@@ -1,44 +1,76 @@
 const prisma = require("../../prisma/lib/prisma");
 
+const inMemoryConversations = new Map();
+
 class ConversationController {
+  static getInMemoryStore() {
+    return inMemoryConversations;
+  }
+
   static async listConversations(req, res, next) {
     try {
       const user = req.user;
       const guest = req.guestSession;
 
+      if (!user && !guest) {
+        return res.status(200).json({
+          status: "success",
+          total: 0,
+          data: [],
+        });
+      }
+
       const whereClause = user
         ? { userId: user.id }
         : { guestSessionId: guest.id };
 
-      const conversations = await prisma.conversation.findMany({
-        where: whereClause,
-        orderBy: { updatedAt: "desc" },
-        include: {
-          messages: {
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            select: {
-              id: true,
-              role: true,
-              content: true,
-              createdAt: true,
+      let formatted = [];
+      try {
+        const conversations = await prisma.conversation.findMany({
+          where: whereClause,
+          orderBy: { updatedAt: "desc" },
+          include: {
+            messages: {
+              orderBy: { createdAt: "desc" },
+              take: 1,
+              select: {
+                id: true,
+                role: true,
+                content: true,
+                createdAt: true,
+              },
+            },
+            _count: {
+              select: { messages: true },
             },
           },
-          _count: {
-            select: { messages: true },
-          },
-        },
-      });
+        });
 
-      const formatted = conversations.map(c => ({
-        id: c.id,
-        title: c.title,
-        messageCount: c._count.messages,
-        lastMessage: c.messages[0] || null,
-        createdAt: c.createdAt,
-        updatedAt: c.updatedAt,
-        expiresAt: c.expiresAt,
-      }));
+        formatted = conversations.map(c => ({
+          id: c.id,
+          title: c.title,
+          messageCount: c._count.messages,
+          lastMessage: c.messages[0] || null,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+          expiresAt: c.expiresAt,
+        }));
+      } catch (dbErr) {
+        console.warn("Database unavailable for listConversations, using in-memory store:", dbErr.message);
+        const ownerId = user ? user.id : (guest ? guest.id : null);
+        const list = Array.from(inMemoryConversations.values()).filter(c => {
+          return user ? c.userId === ownerId : c.guestSessionId === ownerId;
+        });
+        formatted = list.map(c => ({
+          id: c.id,
+          title: c.title,
+          messageCount: (c.messages || []).length,
+          lastMessage: (c.messages && c.messages.length) ? c.messages[c.messages.length - 1] : null,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+          expiresAt: c.expiresAt,
+        }));
+      }
 
       return res.status(200).json({
         status: "success",
@@ -58,14 +90,30 @@ class ConversationController {
         ? req.body.title.trim().slice(0, 100)
         : "New Legal Inquiry";
 
-      const conversation = await prisma.conversation.create({
-        data: {
+      let conversation = null;
+      try {
+        conversation = await prisma.conversation.create({
+          data: {
+            userId: user ? user.id : null,
+            guestSessionId: guest ? guest.id : null,
+            title,
+            expiresAt: guest ? guest.expiresAt : null,
+          },
+        });
+      } catch (dbErr) {
+        console.warn("Database unavailable for createConversation, using in-memory store:", dbErr.message);
+        conversation = {
+          id: "mem-conv-" + Math.random().toString(36).substring(2, 10),
           userId: user ? user.id : null,
           guestSessionId: guest ? guest.id : null,
           title,
+          createdAt: new Date(),
+          updatedAt: new Date(),
           expiresAt: guest ? guest.expiresAt : null,
-        },
-      });
+          messages: [],
+        };
+        inMemoryConversations.set(conversation.id, conversation);
+      }
 
       return res.status(201).json({
         status: "success",
@@ -82,17 +130,23 @@ class ConversationController {
       const user = req.user;
       const guest = req.guestSession;
 
-      const conversation = await prisma.conversation.findUnique({
-        where: { id },
-        include: {
-          messages: {
-            orderBy: { createdAt: "asc" },
-            include: {
-              citations: true,
+      let conversation = null;
+      try {
+        conversation = await prisma.conversation.findUnique({
+          where: { id },
+          include: {
+            messages: {
+              orderBy: { createdAt: "asc" },
+              include: {
+                citations: true,
+              },
             },
           },
-        },
-      });
+        });
+      } catch (dbErr) {
+        console.warn("Database unavailable for getConversationById, reading in-memory store:", dbErr.message);
+        conversation = inMemoryConversations.get(id) || null;
+      }
 
       if (!conversation) {
         return res.status(404).json({
@@ -103,8 +157,8 @@ class ConversationController {
       }
 
       const isOwner = user
-        ? conversation.userId === user.id
-        : conversation.guestSessionId === guest.id;
+        ? (Boolean(conversation.userId) && conversation.userId === user.id)
+        : (Boolean(guest && conversation.guestSessionId) && conversation.guestSessionId === guest.id);
 
       if (!isOwner) {
         return res.status(403).json({
@@ -122,12 +176,12 @@ class ConversationController {
           createdAt: conversation.createdAt,
           updatedAt: conversation.updatedAt,
           expiresAt: conversation.expiresAt,
-          messages: conversation.messages.map(m => ({
+          messages: (conversation.messages || []).map(m => ({
             id: m.id,
             role: m.role,
             content: m.content,
             structuredResponse: m.structuredResponse,
-            citations: m.citations,
+            citations: m.citations || [],
             createdAt: m.createdAt,
           })),
         },
@@ -143,9 +197,14 @@ class ConversationController {
       const user = req.user;
       const guest = req.guestSession;
 
-      const conversation = await prisma.conversation.findUnique({
-        where: { id },
-      });
+      let conversation = null;
+      try {
+        conversation = await prisma.conversation.findUnique({
+          where: { id },
+        });
+      } catch (dbErr) {
+        conversation = inMemoryConversations.get(id) || null;
+      }
 
       if (!conversation) {
         return res.status(404).json({
@@ -156,8 +215,8 @@ class ConversationController {
       }
 
       const isOwner = user
-        ? conversation.userId === user.id
-        : conversation.guestSessionId === guest.id;
+        ? (Boolean(conversation.userId) && conversation.userId === user.id)
+        : (Boolean(guest && conversation.guestSessionId) && conversation.guestSessionId === guest.id);
 
       if (!isOwner) {
         return res.status(403).json({
@@ -167,9 +226,13 @@ class ConversationController {
         });
       }
 
-      await prisma.conversation.delete({
-        where: { id },
-      });
+      try {
+        await prisma.conversation.delete({
+          where: { id },
+        });
+      } catch (dbErr) {
+        inMemoryConversations.delete(id);
+      }
 
       return res.status(200).json({
         status: "success",
