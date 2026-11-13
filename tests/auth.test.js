@@ -130,4 +130,77 @@ describe("B. Google Authentication & User Sessions", () => {
     assert.equal(res.status, 401);
     assert.equal(res.body.code, "SESSION_INVALID_OR_EXPIRED");
   });
+
+  it("should register a new user with email and password", async () => {
+    const email = `citizen_${Date.now()}@example.com`;
+    const res = await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password: "securePassword123!",
+        name: "Citizen Kumar",
+      }),
+    });
+
+    assert.equal(res.status, 201);
+    assert.equal(res.body.status, "success");
+    assert.equal(res.body.data.user.email, email);
+    assert.equal(res.body.data.user.name, "Citizen Kumar");
+    assert.ok(res.body.data.session.token);
+
+    const dbUser = await prisma.user.findUnique({ where: { email } });
+    assert.ok(dbUser);
+    assert.ok(dbUser.passwordHash);
+    assert.ok(dbUser.passwordHash.includes(":"));
+  });
+
+  it("should reject duplicate registration with existing email", async () => {
+    const email = `dupe_${Date.now()}@example.com`;
+    await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password: "password123", name: "Dupe User" }),
+    });
+
+    const res = await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password: "password123", name: "Dupe User" }),
+    });
+
+    assert.equal(res.status, 409);
+    assert.equal(res.body.code, "EMAIL_ALREADY_EXISTS");
+  });
+
+  it("should login an existing user with valid email and password", async () => {
+    const email = `login_${Date.now()}@example.com`;
+    await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password: "correctPassword123" }),
+    });
+
+    const res = await apiRequest("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password: "correctPassword123" }),
+    });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.status, "success");
+    assert.equal(res.body.data.user.email, email);
+    assert.ok(res.body.data.session.token);
+  });
+
+  it("should reject login with wrong password", async () => {
+    const email = `wrong_${Date.now()}@example.com`;
+    await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password: "realPassword123" }),
+    });
+
+    const res = await apiRequest("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password: "incorrectPassword" }),
+    });
+
+    assert.equal(res.status, 401);
+    assert.equal(res.body.code, "INVALID_CREDENTIALS");
+  });
 });
