@@ -784,7 +784,7 @@
   background: var(--deepNavy);
   color: rgba(255, 255, 255, 0.78);
   border-top: 3px solid var(--saffron);
-  padding-top: 54px;
+  padding-top: 56px;
   font-size: 0.84rem;
 }
 .footerGrid {

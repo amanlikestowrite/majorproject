@@ -181,7 +181,7 @@ textarea:focus-visible {
   border-color: var(--navy);
 }
 .navbar {
-  padding: 12px 0;
+  padding: 14px 0;
 }
 .navContent {
   display: flex;
