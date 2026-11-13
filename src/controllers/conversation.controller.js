@@ -12,6 +12,14 @@ class ConversationController {
       const user = req.user;
       const guest = req.guestSession;
 
+      if (!user && !guest) {
+        return res.status(200).json({
+          status: "success",
+          total: 0,
+          data: [],
+        });
+      }
+
       const whereClause = user
         ? { userId: user.id }
         : { guestSessionId: guest.id };

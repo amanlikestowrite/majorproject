@@ -56,35 +56,44 @@ const AuthManager = (function () {
     const storedAuthToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     const storedGuestToken = localStorage.getItem(STORAGE_KEYS.GUEST_TOKEN);
 
-    // 1. Try restoring authenticated user session first
-    try {
-      const headers = { 'Accept': 'application/json' };
-      if (storedAuthToken) {
-        headers['Authorization'] = `Bearer ${storedAuthToken}`;
-        headers['x-auth-token'] = storedAuthToken;
-      }
+    // 1. Try restoring authenticated user session only if auth token exists in storage
+    if (storedAuthToken) {
+      try {
+        const headers = {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${storedAuthToken}`,
+          'x-auth-token': storedAuthToken,
+        };
 
-      const res = await fetch(`${getBaseUrl()}/api/auth/me`, {
-        method: 'GET',
-        headers,
-        credentials: 'include',
-      });
+        const res = await fetch(`${getBaseUrl()}/api/auth/me`, {
+          method: 'GET',
+          headers,
+          credentials: 'include',
+        });
 
-      if (res.ok) {
-        const body = await res.json();
-        if (body.status === 'success' && body.data) {
-          state.sessionType = 'user';
-          state.user = body.data;
-          state.authToken = storedAuthToken;
-          localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'user');
-          localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(body.data));
-          updateNavbarUI();
-          state.isLoading = false;
-          return { type: 'user', user: body.data };
+        if (res.ok) {
+          const body = await res.json();
+          if (body.status === 'success' && body.data) {
+            state.sessionType = 'user';
+            state.user = body.data;
+            state.authToken = storedAuthToken;
+            localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'user');
+            localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(body.data));
+            updateNavbarUI();
+            if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
+              window.ConversationManager.fetchConversations();
+            }
+            state.isLoading = false;
+            return { type: 'user', user: body.data };
+          }
+        } else {
+          // Token is revoked or invalid on server
+          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER_DATA);
         }
+      } catch (err) {
+        console.warn('Authentication check failed or server unreachable:', err.message);
       }
-    } catch (err) {
-      console.warn('Authentication check failed or server unreachable:', err.message);
     }
 
     // 2. If no user session, try validating existing guest session
@@ -95,6 +104,9 @@ const AuthManager = (function () {
         state.guestToken = storedGuestToken;
         state.guest = storedGuestData ? JSON.parse(storedGuestData) : { active: true, sessionId: 'local' };
         updateNavbarUI();
+        if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
+          window.ConversationManager.fetchConversations();
+        }
         state.isLoading = false;
         return { type: 'guest', guest: state.guest };
       }
@@ -119,6 +131,9 @@ const AuthManager = (function () {
             localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'guest');
             localStorage.setItem(STORAGE_KEYS.GUEST_DATA, JSON.stringify(body.data));
             updateNavbarUI();
+            if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
+              window.ConversationManager.fetchConversations();
+            }
             state.isLoading = false;
             return { type: 'guest', guest: body.data };
           }
@@ -136,6 +151,11 @@ const AuthManager = (function () {
     state.user = null;
     state.guest = null;
     localStorage.removeItem(STORAGE_KEYS.SESSION_TYPE);
+    document.cookie = 'nyaya_auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+    document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+    if (window.ConversationManager && typeof window.ConversationManager.clearState === 'function') {
+      window.ConversationManager.clearState();
+    }
     updateNavbarUI();
     state.isLoading = false;
     return { type: 'none' };
@@ -189,6 +209,9 @@ const AuthManager = (function () {
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
 
       updateNavbarUI();
+      if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
+        window.ConversationManager.fetchConversations();
+      }
       if (window.UIInteractions && window.UIInteractions.showToast) {
         window.UIInteractions.showToast('Citizen Guest Mode activated (24h ephemeral session)');
       }
@@ -238,6 +261,9 @@ const AuthManager = (function () {
       localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
 
       updateNavbarUI();
+      if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
+        window.ConversationManager.fetchConversations();
+      }
       if (window.UIInteractions && window.UIInteractions.showToast) {
         window.UIInteractions.showToast(`Welcome, ${user.name || 'Citizen'}!`);
       }
@@ -280,6 +306,29 @@ const AuthManager = (function () {
       localStorage.removeItem(STORAGE_KEYS.SESSION_TYPE);
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
       localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
+
+      // Expire cookies explicitly client-side
+      document.cookie = 'nyaya_auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+      document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+
+      // Clear active conversation ID and wipe chat stream messages
+      if (typeof window.resetToNewConversation === 'function') {
+        window.resetToNewConversation(true);
+      } else {
+        const stream = document.getElementById('chatStream');
+        if (stream) {
+          stream.innerHTML = '';
+          stream.style.display = 'none';
+        }
+        const empty = document.getElementById('emptyState');
+        if (empty) empty.style.display = 'block';
+        window.activeConversationId = null;
+      }
+
+      // Clear conversation sidebar state
+      if (window.ConversationManager && typeof window.ConversationManager.clearState === 'function') {
+        window.ConversationManager.clearState();
+      }
 
       updateNavbarUI();
       if (window.UIInteractions && window.UIInteractions.showToast) {

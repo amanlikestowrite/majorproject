@@ -105,6 +105,9 @@ class AuthController {
       }
 
       res.clearCookie("nyaya_auth_token", { path: "/" });
+      res.clearCookie("nyaya_guest_token", { path: "/" });
+      res.cookie("nyaya_auth_token", "", { path: "/", expires: new Date(0), maxAge: 0 });
+      res.cookie("nyaya_guest_token", "", { path: "/", expires: new Date(0), maxAge: 0 });
 
       return res.status(200).json({
         status: "success",

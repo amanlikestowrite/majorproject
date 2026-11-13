@@ -26,6 +26,16 @@ const ConversationManager = (function () {
     const listEl = document.getElementById('conversationList');
     if (!listEl) return [];
 
+    // Guard: If unauthenticated citizen, immediately reset and show empty state
+    if (window.AuthManager) {
+      const authState = window.AuthManager.getState();
+      if (!authState.isLoading && (authState.sessionType === 'none' || (!authState.user && !authState.guest))) {
+        conversations = [];
+        renderEmptyState('Start an inquiry or sign in to save your history.');
+        return [];
+      }
+    }
+
     isLoading = true;
     listEl.innerHTML = `
       <div class="convLoadingState">
@@ -280,16 +290,32 @@ const ConversationManager = (function () {
     // Default collapse on small screens
     if (window.innerWidth < 768) {
       toggleSidebar(false);
-    } else {
-      fetchConversations();
+    }
+
+    if (window.AuthManager) {
+      const authState = window.AuthManager.getState();
+      if (authState.sessionType !== 'none' && (authState.user || authState.guest)) {
+        fetchConversations();
+      }
     }
   });
+
+  function clearState() {
+    conversations = [];
+    window.activeConversationId = null;
+    const listEl = document.getElementById('conversationList');
+    if (listEl) {
+      listEl.innerHTML = '';
+      renderEmptyState('Start an inquiry or sign in to save your history.');
+    }
+  }
 
   return {
     fetchConversations,
     loadConversation,
     deleteConversation,
     toggleSidebar,
+    clearState,
   };
 })();
 

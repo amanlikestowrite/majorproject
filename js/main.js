@@ -357,7 +357,7 @@
       scrollChatBottom();
     }
   }
-  function resetToNewConversation() {
+  function resetToNewConversation(silent = false) {
     activeConversationId = null;
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (dom.chatStream) {
@@ -372,10 +372,11 @@
     }
     if (dom.chatInput) {
       dom.chatInput.value = '';
-      dom.chatInput.focus();
     }
     isAwaitingResponse = false;
-    UIInteractions.showToast('Started a new conversation');
+    if (!silent) {
+      UIInteractions.showToast('Started a new conversation');
+    }
   }
   function setupChatEventListeners() {
     if (dom.chatForm) {
