@@ -157,3 +157,26 @@
     justify-content: flex-end;
   }
 }
+
+@media (max-width: 900px) {
+  .chatSidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+  .chatSidebar.open {
+    transform: translateX(0);
+  }
+  .sidebarCloseBtn {
+    display: inline-flex;
+  }
+  .stageToggleBtn {
+    display: inline-flex;
+  }
+  .chatHeaderLeft {
+    gap: 10px;
+  }
+}

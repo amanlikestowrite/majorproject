@@ -157,8 +157,8 @@ class ConversationController {
       }
 
       const isOwner = user
-        ? conversation.userId === user.id
-        : conversation.guestSessionId === guest.id;
+        ? (Boolean(conversation.userId) && conversation.userId === user.id)
+        : (Boolean(guest && conversation.guestSessionId) && conversation.guestSessionId === guest.id);
 
       if (!isOwner) {
         return res.status(403).json({
@@ -215,8 +215,8 @@ class ConversationController {
       }
 
       const isOwner = user
-        ? conversation.userId === user.id
-        : conversation.guestSessionId === guest.id;
+        ? (Boolean(conversation.userId) && conversation.userId === user.id)
+        : (Boolean(guest && conversation.guestSessionId) && conversation.guestSessionId === guest.id);
 
       if (!isOwner) {
         return res.status(403).json({

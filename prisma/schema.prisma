@@ -11,13 +11,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  googleSub String?  @unique
-  email     String?  @unique
-  name      String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id           String   @id @default(uuid())
+  googleSub    String?  @unique
+  email        String?  @unique
+  passwordHash String?
+  name         String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 
   sessions      AuthSession[]
   conversations Conversation[]

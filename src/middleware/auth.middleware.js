@@ -1,4 +1,5 @@
 const SessionService = require("../services/session.service");
+const { hashToken } = require("../utils/crypto.util");
 
 function extractToken(req, type = "auth") {
   if (type === "guest") {
@@ -20,12 +21,12 @@ function extractToken(req, type = "auth") {
   }
 
   // type === "auth"
+  // If request explicitly carries guest token, do NOT extract any auth token
+  if (req.headers["x-guest-token"] || (req.cookies && req.cookies.nyaya_guest_token && !req.headers["x-auth-token"])) {
+    return null;
+  }
   if (req.headers["x-auth-token"]) {
     return req.headers["x-auth-token"].trim();
-  }
-  // If request explicitly carries guest token, do NOT extract any auth token
-  if (req.headers["x-guest-token"]) {
-    return null;
   }
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -101,13 +102,22 @@ async function requireAnySession(req, res, next) {
     // 1. Explicit guest request: prioritize guest session exclusively
     if (req.headers["x-guest-token"]) {
       const guestToken = req.headers["x-guest-token"].trim();
-      const guestSession = await SessionService.validateGuestToken(guestToken);
-      if (guestSession) {
-        req.guestSession = guestSession;
-        req.sessionToken = guestToken;
-        req.user = null;
-        return next();
+      let guestSession = await SessionService.validateGuestToken(guestToken);
+      if (!guestSession) {
+        // Create an ephemeral guest session for unpersisted/local guest token so it is strictly isolated
+        guestSession = {
+          id: "ephemeral-guest-" + hashToken(guestToken).substring(0, 16),
+          sessionTokenHash: hashToken(guestToken),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          createdAt: new Date(),
+          lastActivityAt: new Date(),
+        };
       }
+      req.guestSession = guestSession;
+      req.sessionToken = guestToken;
+      req.user = null;
+      req.authSession = null;
+      return next();
     }
 
     // 2. Explicit user auth request: prioritize user session exclusively
@@ -149,31 +159,30 @@ async function requireAnySession(req, res, next) {
 
     // 4. Cookies fallback
     if (req.cookies) {
-      if (req.cookies.nyaya_guest_token && !req.cookies.nyaya_auth_token) {
-        const guestSession = await SessionService.validateGuestToken(req.cookies.nyaya_guest_token);
-        if (guestSession) {
-          req.guestSession = guestSession;
-          req.sessionToken = req.cookies.nyaya_guest_token;
-          req.user = null;
-          return next();
+      if (req.cookies.nyaya_guest_token && !req.headers["x-auth-token"]) {
+        let guestSession = await SessionService.validateGuestToken(req.cookies.nyaya_guest_token);
+        if (!guestSession) {
+          guestSession = {
+            id: "ephemeral-guest-" + hashToken(req.cookies.nyaya_guest_token).substring(0, 16),
+            sessionTokenHash: hashToken(req.cookies.nyaya_guest_token),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            createdAt: new Date(),
+            lastActivityAt: new Date(),
+          };
         }
+        req.guestSession = guestSession;
+        req.sessionToken = req.cookies.nyaya_guest_token;
+        req.user = null;
+        req.authSession = null;
+        return next();
       }
-      if (req.cookies.nyaya_auth_token) {
+      if (req.cookies.nyaya_auth_token && !req.headers["x-guest-token"]) {
         const authSession = await SessionService.validateAuthToken(req.cookies.nyaya_auth_token);
         if (authSession) {
           req.user = authSession.user;
           req.authSession = authSession;
           req.sessionToken = req.cookies.nyaya_auth_token;
           req.guestSession = null;
-          return next();
-        }
-      }
-      if (req.cookies.nyaya_guest_token) {
-        const guestSession = await SessionService.validateGuestToken(req.cookies.nyaya_guest_token);
-        if (guestSession) {
-          req.guestSession = guestSession;
-          req.sessionToken = req.cookies.nyaya_guest_token;
-          req.user = null;
           return next();
         }
       }

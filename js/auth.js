@@ -223,6 +223,10 @@ const AuthManager = (function () {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
 
+      if (window.API && typeof window.API.setGuestToken === 'function') {
+        window.API.setGuestToken(guestData.token, guestData.sessionId);
+      }
+
       updateNavbarUI();
       if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
         window.ConversationManager.fetchConversations();
@@ -284,6 +288,10 @@ const AuthManager = (function () {
       localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
 
+      if (window.API && typeof window.API.setAuthToken === 'function') {
+        window.API.setAuthToken(session.token);
+      }
+
       updateNavbarUI();
       if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
         window.ConversationManager.fetchConversations();
@@ -301,6 +309,145 @@ const AuthManager = (function () {
       state.isLoading = false;
     }
   }
+
+  async function loginWithPassword(email, password) {
+    if (!email || !password) {
+      throw new Error('Email and password are required.');
+    }
+    state.isLoading = true;
+    try {
+      // 1. Clean up any guest cookies or residual chat state
+      document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+      if (window.ConversationManager && typeof window.ConversationManager.clearState === 'function') {
+        window.ConversationManager.clearState();
+      }
+      if (typeof window.resetToNewConversation === 'function') {
+        window.resetToNewConversation(true);
+      }
+
+      const res = await fetch(`${getBaseUrl()}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      const body = await res.json();
+      if (!res.ok || body.status !== 'success') {
+        throw new Error(body.message || 'Login failed. Please verify credentials.');
+      }
+
+      const { user, session } = body.data;
+      state.sessionType = 'user';
+      state.user = user;
+      state.authToken = session.token;
+      state.guest = null;
+      state.guestToken = null;
+
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, session.token);
+      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'user');
+      localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
+
+      if (window.API && typeof window.API.setAuthToken === 'function') {
+        window.API.setAuthToken(session.token);
+      }
+
+      if (window.API && typeof window.API.setAuthToken === 'function') {
+        window.API.setAuthToken(session.token);
+      }
+
+      updateNavbarUI();
+      if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
+        window.ConversationManager.fetchConversations();
+      }
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast();
+      }
+      return user;
+    } catch (err) {
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast(err.message || 'Login error');
+      }
+      throw err;
+    } finally {
+      state.isLoading = false;
+    }
+  }
+
+  async function registerWithPassword(email, password, name) {
+    if (!email || !password) {
+      throw new Error('Email and password are required.');
+    }
+    state.isLoading = true;
+    try {
+      // 1. Clean up any guest cookies or residual chat state
+      document.cookie = 'nyaya_guest_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
+      if (window.ConversationManager && typeof window.ConversationManager.clearState === 'function') {
+        window.ConversationManager.clearState();
+      }
+      if (typeof window.resetToNewConversation === 'function') {
+        window.resetToNewConversation(true);
+      }
+
+      const res = await fetch(`${getBaseUrl()}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email: email.trim(), password, name: name ? name.trim() : null }),
+      });
+
+      const body = await res.json();
+      if (!res.ok || body.status !== 'success') {
+        throw new Error(body.message || 'Registration failed. Please try again.');
+      }
+
+      const { user, session } = body.data;
+      state.sessionType = 'user';
+      state.user = user;
+      state.authToken = session.token;
+      state.guest = null;
+      state.guestToken = null;
+
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, session.token);
+      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.SESSION_TYPE, 'user');
+      localStorage.removeItem(STORAGE_KEYS.GUEST_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
+
+      if (window.API && typeof window.API.setAuthToken === 'function') {
+        window.API.setAuthToken(session.token);
+      }
+
+      if (window.API && typeof window.API.setAuthToken === 'function') {
+        window.API.setAuthToken(session.token);
+      }
+
+      updateNavbarUI();
+      if (window.ConversationManager && typeof window.ConversationManager.fetchConversations === 'function') {
+        window.ConversationManager.fetchConversations();
+      }
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast();
+      }
+      return user;
+    } catch (err) {
+      if (window.UIInteractions && window.UIInteractions.showToast) {
+        window.UIInteractions.showToast(err.message || 'Registration error');
+      }
+      throw err;
+    } finally {
+      state.isLoading = false;
+    }
+  }
+
 
   async function logout() {
     state.isLoading = true;
@@ -330,6 +477,11 @@ const AuthManager = (function () {
       localStorage.removeItem(STORAGE_KEYS.SESSION_TYPE);
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
       localStorage.removeItem(STORAGE_KEYS.GUEST_DATA);
+
+      if (window.API) {
+        if (typeof window.API.setAuthToken === 'function') window.API.setAuthToken(null);
+        if (typeof window.API.setGuestToken === 'function') window.API.setGuestToken(null);
+      }
 
       // Expire cookies explicitly client-side
       document.cookie = 'nyaya_auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax;';
@@ -705,6 +857,141 @@ const AuthManager = (function () {
         });
       }
 
+      // Member 2 Login & Signup Form Listeners
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      const loginTabBtn = document.getElementById('loginTabBtn');
+      const signupTabBtn = document.getElementById('signupTabBtn');
+      const loginError = document.getElementById('loginError');
+      const signupError = document.getElementById('signupError');
+      const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+      const forgotModal = document.getElementById('forgotModal');
+      const forgotModalClose = document.getElementById('forgotModalClose');
+      const backToLoginBtn = document.getElementById('backToLoginBtn');
+      const continueGuestBtn = document.getElementById('continueGuestBtn');
+      const authOpenBtn = document.getElementById('authOpenBtn');
+      const navLogoutBtn = document.getElementById('logoutBtn');
+
+      if (navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', async () => {
+          try {
+            await logout();
+            this.close();
+          } catch (err) {
+            this.showError(err.message || 'Logout failed.');
+          }
+        });
+      }
+
+      if (loginTabBtn && signupTabBtn) {
+        loginTabBtn.addEventListener('click', () => {
+          loginTabBtn.classList.add('active');
+          signupTabBtn.classList.remove('active');
+          loginTabBtn.style.background = 'var(--ivory)';
+          signupTabBtn.style.background = 'var(--white)';
+          if (loginForm) loginForm.style.display = 'block';
+          if (signupForm) signupForm.style.display = 'none';
+          if (loginError) loginError.textContent = '';
+          if (signupError) signupError.textContent = '';
+        });
+        signupTabBtn.addEventListener('click', () => {
+          signupTabBtn.classList.add('active');
+          loginTabBtn.classList.remove('active');
+          signupTabBtn.style.background = 'var(--ivory)';
+          loginTabBtn.style.background = 'var(--white)';
+          if (signupForm) signupForm.style.display = 'block';
+          if (loginForm) loginForm.style.display = 'none';
+          if (loginError) loginError.textContent = '';
+          if (signupError) signupError.textContent = '';
+        });
+      }
+
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const emailInput = document.getElementById('loginEmail');
+          const passInput = document.getElementById('loginPassword');
+          const email = emailInput ? emailInput.value.trim() : '';
+          const pass = passInput ? passInput.value : '';
+          if (!email || !pass) {
+            if (loginError) loginError.textContent = 'Please enter both email and password.';
+            return;
+          }
+          const submitBtn = loginForm.querySelector('button[type="submit"]');
+          try {
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Signing In...'; }
+            if (loginError) loginError.textContent = '';
+            await loginWithPassword(email, pass);
+            this.close();
+          } catch (err) {
+            if (loginError) loginError.textContent = err.message || 'Login failed.';
+          } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Sign In with Password'; }
+          }
+        });
+      }
+
+      if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const nameInput = document.getElementById('signupName');
+          const emailInput = document.getElementById('signupEmail');
+          const passInput = document.getElementById('signupPassword');
+          const confirmInput = document.getElementById('signupConfirmPassword');
+          const name = nameInput ? nameInput.value.trim() : '';
+          const email = emailInput ? emailInput.value.trim() : '';
+          const pass = passInput ? passInput.value : '';
+          const confirm = confirmInput ? confirmInput.value : '';
+
+          if (!email || !pass) {
+            if (signupError) signupError.textContent = 'Email and password are required.';
+            return;
+          }
+          if (pass.length < 6) {
+            if (signupError) signupError.textContent = 'Password must be at least 6 characters.';
+            return;
+          }
+          if (pass !== confirm) {
+            if (signupError) signupError.textContent = 'Passwords do not match.';
+            return;
+          }
+          const submitBtn = signupForm.querySelector('button[type="submit"]');
+          try {
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creating Account...'; }
+            if (signupError) signupError.textContent = '';
+            await registerWithPassword(email, pass, name);
+            this.close();
+          } catch (err) {
+            if (signupError) signupError.textContent = err.message || 'Registration failed.';
+          } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Create Account'; }
+          }
+        });
+      }
+
+      if (forgotPasswordLink && forgotModal) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.close();
+          forgotModal.classList.add('active');
+        });
+      }
+      if (forgotModalClose && forgotModal) {
+        forgotModalClose.addEventListener('click', () => forgotModal.classList.remove('active'));
+      }
+      if (backToLoginBtn && forgotModal) {
+        backToLoginBtn.addEventListener('click', () => {
+          forgotModal.classList.remove('active');
+          this.open('signin');
+        });
+      }
+      if (continueGuestBtn) {
+        continueGuestBtn.addEventListener('click', () => triggerGuest(continueGuestBtn));
+      }
+      if (authOpenBtn) {
+        authOpenBtn.addEventListener('click', () => this.open('signin'));
+      }
+
       this.initGoogleIdentityServices();
     }
   };
@@ -716,12 +1003,28 @@ const AuthManager = (function () {
 
   window.AuthModal = AuthModal;
 
+  
+  const AuthUI = {
+    init: function () {
+      AuthModal.initModalListeners();
+      checkExistingSession();
+    },
+    openAuthModal: (mode = 'login') => AuthModal.open(mode === 'signup' ? 'signin' : 'signin'),
+    closeAuthModal: () => AuthModal.close(),
+    getCurrentUser: () => state.user,
+    isGuest: () => state.sessionType === 'guest',
+  };
+
+  window.AuthUI = AuthUI;
+
   return {
     getBaseUrl,
     getAuthHeaders,
     checkExistingSession,
     startGuestSession,
     loginWithGoogle,
+        loginWithPassword,
+    registerWithPassword,
     logout,
     getState: () => ({ ...state }),
     updateNavbarUI,

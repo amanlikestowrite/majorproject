@@ -74,7 +74,7 @@
               </button>
             </li>
           </ul>
-          <div class="navAuthGroup" id="navAuthGroup">
+          <div class="navAuthGroup navAuthWrap" id="navAuthGroup">
             <button type="button" class="navBtn navBtnGhost" id="navGuestBtn" title="Use application without an account">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -82,13 +82,16 @@
               </svg>
               <span>Guest Mode</span>
             </button>
-            <button type="button" class="navBtn navBtnPrimary" id="navLoginBtn" title="Sign in with your Google account">
+            <button type="button" class="navBtn navBtnPrimary" id="navLoginBtn" title="Sign in with your Google account or email">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
                 <polyline points="10 17 15 12 10 7"></polyline>
                 <line x1="15" y1="12" x2="3" y2="12"></line>
               </svg>
               <span>Sign In</span>
+            </button>
+            <button type="button" id="authOpenBtn" class="navAuthBtn" style="display:none;" aria-hidden="true">
+              <span>Sign In / Register</span>
             </button>
             <div class="navUserWidget" id="navUserWidget" title="Account profile and settings" aria-haspopup="true">
               <div class="navUserAvatar" id="navUserAvatar">G</div>
@@ -98,6 +101,20 @@
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </div>
+            <div class="userProfileArea" id="userProfileArea" style="display:none;">
+              <div class="profileAvatar" id="profileAvatar">U</div>
+              <div class="profileDropdown" id="profileDropdown" style="display:none;">
+                <div class="profileName" id="profileName">Citizen User</div>
+                <div class="profileEmail" id="profileEmail">user@example.com</div>
+                <div class="profileBadge" id="profileBadge">Verified Account</div>
+                <div class="profileDivider"></div>
+                <button type="button" class="dropdownActionBtn" id="logoutBtn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          </div>            </div>
           </div>
           <button type="button" class="menuToggle" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -111,6 +128,7 @@
     </div>
     <div class="patternStrip" aria-hidden="true"></div>
   </header>
+
   <section class="hero" id="home" aria-label="Introduction to Department of Justice Virtual Assistant">
     <div class="container heroGrid">
       <div class="heroContent">
@@ -252,11 +270,13 @@
       </div>
     </div>
   </section>
+
   <div class="container">
     <div class="divider" aria-hidden="true">
       <div class="dividerDiamond"></div>
     </div>
   </div>
+
   <section class="servicesSection" id="services" aria-label="Service Discovery and Common Inquiries">
     <div class="container">
       <div class="sectionHeader">
@@ -404,18 +424,21 @@
       </div>
     </div>
   </section>
+
   <div class="container">
     <div class="divider" aria-hidden="true">
       <div class="dividerDiamond"></div>
     </div>
   </div>
-  <section class="chatSection" id="chatbot" aria-label="Nyaya Sahayak Virtual Assistant Chatbot">
+
+  <section class="chatSection" id="chatbot" aria-label="Nyaya Sahayak Virtual Assistant Workspace">
     <div class="container">
       <div class="sectionHeader">
         <span class="sectionEyebrow">CONVERSATIONAL ASSISTANT</span>
         <h2 class="sectionTitle">Nyaya Sahayak Virtual Assistant</h2>
         <p class="sectionSubtitle">Interactive digital assistant for judicial services and Department of Justice information.</p>
       </div>
+
       <div class="chatContainer">
         <div class="chatHeader">
           <div class="chatHeaderLeft">
@@ -458,6 +481,7 @@
             </button>
           </div>
         </div>
+
         <div class="chatBody">
           <aside class="chatSidebar" id="chatSidebar" aria-label="Inquiry History">
             <div class="sidebarHeader">
@@ -474,116 +498,122 @@
               <!-- Dynamically populated from /api/conversations -->
             </div>
           </aside>
+
           <div class="chatMain">
             <div class="chatViewport" id="chatViewport" role="log" aria-live="polite">
-          <div class="emptyState" id="emptyState">
-            <span class="emptyBadge">Department of Justice</span>
-            <br>
-            <div class="emptyIcon" aria-hidden="true">
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="14.5" stroke="#142B4A" stroke-width="1.5"/>
-                <path d="M16 7V23" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
-                <path d="M10 12H22" stroke="#142B4A" stroke-width="1.5" stroke-linecap="round"/>
-                <circle cx="16" cy="12" r="1.5" fill="#DFA04B"/>
-                <path d="M10 12L7.5 17.5M10 12L12.5 17.5" stroke="#142B4A" stroke-width="0.9"/>
-                <path d="M6.5 17.5C6.5 19 13.5 19 13.5 17.5H6.5Z" fill="#142B4A"/>
-                <path d="M22 12L19.5 17.5M22 12L24.5 17.5" stroke="#142B4A" stroke-width="0.9"/>
-                <path d="M18.5 17.5C18.5 19 25.5 19 25.5 17.5H18.5Z" fill="#142B4A"/>
-                <path d="M12 24H20" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <h3 class="emptyHeading">Namaste! How can I assist you today?</h3>
-            <p class="emptyDesc">I can help you find information about judicial services, court procedures and Department of Justice initiatives.</p>
-            <div class="suggestedHeader">
-              <span class="suggestedTitle">Suggested Questions</span>
-            </div>
-            <div class="suggestedGrid">
-              <button type="button" class="suggestedBtn" query="How can I check my case status?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <span>How can I check my case status?</span>
-              </button>
-              <button type="button" class="suggestedBtn" query="How do I pay a traffic challan?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                <span>How do I pay a traffic challan?</span>
-              </button>
-              <button type="button" class="suggestedBtn" query="How can I file a case online?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-                <span>How can I file a case online?</span>
-              </button>
-              <button type="button" class="suggestedBtn" query="What is the eCourts Services mobile application?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                <span>What is the eCourts Services mobile application?</span>
-              </button>
-              <button type="button" class="suggestedBtn" query="How can I access free legal aid?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>How can I access free legal aid?</span>
-              </button>
-              <button type="button" class="suggestedBtn" query="How do Fast Track Special Courts work?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 6 12 12 15 15"></polyline></svg>
-                <span>How do Fast Track Special Courts work?</span>
-              </button>
-              <button type="button" class="suggestedBtn" query="Where can I find information about judicial vacancies?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path></svg>
-                <span>Where can I find information about judicial vacancies?</span>
-              </button>
-              <button type="button" class="suggestedBtn" query="How can I access Tele-Law services?">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                <span>How can I access Tele-Law services?</span>
-              </button>
-            </div>
-          </div>
-          <div class="chatStream" id="chatStream" style="display: none;"></div>
-          <div class="typingRow" id="typingIndicator" style="display: none; margin: 10px 0 16px 0;" aria-hidden="true">
-            <div class="typingDot"></div>
-            <div class="typingDot"></div>
-            <div class="typingDot"></div>
-            <span class="typingLabel">Nyaya Sahayak is retrieving official judicial guidance...</span>
-          </div>
-        </div>
-        <div class="composer">
-          <form id="chatForm" class="composerForm" autocomplete="off">
-            <div class="inputShell">
-              <label for="chatInput" class="sr-only">Type your question here</label>
-              <textarea 
-                id="chatInput" 
-                class="composerTextarea" 
-                rows="1" 
-                placeholder="Type your question here..." 
-                maxlength="800"
-                required
-              ></textarea>
-              <div class="composerButtons">
-                <button type="button" class="micBtn" id="micBtn" title="Speak question" aria-label="Voice input">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
+              <div class="emptyState" id="emptyState">
+                <span class="emptyBadge">Department of Justice</span>
+                <br>
+                <div class="emptyIcon" aria-hidden="true">
+                  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14.5" stroke="#142B4A" stroke-width="1.5"/>
+                    <path d="M16 7V23" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M10 12H22" stroke="#142B4A" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="16" cy="12" r="1.5" fill="#DFA04B"/>
+                    <path d="M10 12L7.5 17.5M10 12L12.5 17.5" stroke="#142B4A" stroke-width="0.9"/>
+                    <path d="M6.5 17.5C6.5 19 13.5 19 13.5 17.5H6.5Z" fill="#142B4A"/>
+                    <path d="M22 12L19.5 17.5M22 12L24.5 17.5" stroke="#142B4A" stroke-width="0.9"/>
+                    <path d="M18.5 17.5C18.5 19 25.5 19 25.5 17.5H18.5Z" fill="#142B4A"/>
+                    <path d="M12 24H20" stroke="#142B4A" stroke-width="1.8" stroke-linecap="round"/>
                   </svg>
-                </button>
-                <button type="submit" class="sendBtn" id="sendBtn" aria-label="Send question">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                </button>
+                </div>
+                <h3 class="emptyHeading">Namaste! How can I assist you today?</h3>
+                <p class="emptyDesc">I can help you find information about judicial services, court procedures and Department of Justice initiatives.</p>
+                <div class="suggestedHeader">
+                  <span class="suggestedTitle">Suggested Questions</span>
+                </div>
+                <div class="suggestedGrid">
+                  <button type="button" class="suggestedBtn" query="How can I check my case status?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span>How can I check my case status?</span>
+                  </button>
+                  <button type="button" class="suggestedBtn" query="How do I pay a traffic challan?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                    <span>How do I pay a traffic challan?</span>
+                  </button>
+                  <button type="button" class="suggestedBtn" query="How can I file a case online?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                    <span>How can I file a case online?</span>
+                  </button>
+                  <button type="button" class="suggestedBtn" query="What is the eCourts Services mobile application?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    <span>What is the eCourts Services mobile application?</span>
+                  </button>
+                  <button type="button" class="suggestedBtn" query="How can I access free legal aid?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span>How can I access free legal aid?</span>
+                  </button>
+                  <button type="button" class="suggestedBtn" query="How do Fast Track Special Courts work?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 6 12 12 15 15"></polyline></svg>
+                    <span>How do Fast Track Special Courts work?</span>
+                  </button>
+                  <button type="button" class="suggestedBtn" query="Where can I find information about judicial vacancies?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path></svg>
+                    <span>Where can I find information about judicial vacancies?</span>
+                  </button>
+                  <button type="button" class="suggestedBtn" query="How can I access Tele-Law services?">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span>How can I access Tele-Law services?</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="chatStream" id="chatStream" style="display: none;"></div>
+
+              <div class="typingRow" id="typingIndicator" style="display: none; margin: 10px 0 16px 0;" aria-hidden="true">
+                <div class="typingDot"></div>
+                <div class="typingDot"></div>
+                <div class="typingDot"></div>
+                <span class="typingLabel">Nyaya Sahayak is retrieving official judicial guidance...</span>
               </div>
             </div>
-            <div class="disclaimer">
-              Please avoid sharing sensitive personal information. Responses are for general informational purposes.
+
+            <div class="composer">
+              <form id="chatForm" class="composerForm" autocomplete="off">
+                <div class="inputShell">
+                  <label for="chatInput" class="sr-only">Type your question here</label>
+                  <textarea 
+                    id="chatInput" 
+                    class="composerTextarea" 
+                    rows="1" 
+                    placeholder="Type your judicial or legal procedure inquiry here..." 
+                    maxlength="1000" 
+                    required
+                  ></textarea>
+                  <div class="composerButtons">
+                    <button type="button" class="micBtn" id="micBtn" title="Speak question" aria-label="Voice input">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                      </svg>
+                    </button>
+                    <button type="submit" class="sendBtn" id="sendBtn" aria-label="Send question">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="disclaimer">
+                  Please avoid sharing sensitive personal information. Responses are for general informational purposes.
+                </div>
+              </form>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+
   <div class="container">
     <div class="divider" aria-hidden="true">
       <div class="dividerDiamond"></div>
     </div>
   </div>
-  <section class="trustSection" id="about" aria-label="Institutional Trust and Accessibility Standards">
+    <section class="trustSection" id="about" aria-label="Institutional Trust and Accessibility Standards">
     <div class="container">
       <div class="sectionHeader">
         <span class="sectionEyebrow">INSTITUTIONAL TRUST</span>
@@ -635,7 +665,9 @@
       </div>
     </div>
   </section>
+
   <div class="patternStrip" aria-hidden="true"></div>
+
   <section class="statsBand" aria-label="Official Judicial Data Highlights">
     <div class="container">
       <div class="statsGrid">
@@ -662,6 +694,7 @@
       </div>
     </div>
   </section>
+
   <footer class="footer" role="contentinfo">
     <div class="container">
       <div class="footerGrid">
@@ -778,7 +811,7 @@
       <!-- Panel 1: Sign In -->
       <div class="modalTabPanel active" id="panelSignIn" role="tabpanel" aria-labelledby="tabBtnSignIn">
         <div class="authInfoNotice">
-          <strong>Official Citizen Identity:</strong> Sign in with your Google account to keep your legal inquiries and case bookmarks synchronized across devices.
+          <strong>Official Citizen Identity:</strong> Sign in with your Google account or email credentials to access saved inquiries and statutory references.
         </div>
 
         <div class="googleSignInWrapper">
@@ -798,6 +831,58 @@
         </div>
 
         <div class="authDivider">
+          <span>Or Sign In with Email</span>
+        </div>
+
+        <div class="authSubTabs" style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button type="button" class="authSubTabBtn active" id="loginTabBtn" style="flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--ivory); font-weight: 600; font-size: 0.82rem; cursor: pointer;">Sign In</button>
+          <button type="button" class="authSubTabBtn" id="signupTabBtn" style="flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--white); font-weight: 600; font-size: 0.82rem; cursor: pointer;">Register</button>
+        </div>
+
+        <!-- Email Sign In Form -->
+        <form id="loginForm" class="emailAuthForm">
+          <div class="formError" id="loginError" style="display: none; color: #dc2626; font-size: 0.82rem; margin-bottom: 8px;"></div>
+          <div class="formGroup" style="margin-bottom: 10px;">
+            <label class="formLabel" for="loginEmail" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Email Address</label>
+            <input type="email" id="loginEmail" class="formInput" placeholder="name@example.com" required autocomplete="email" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem;">
+          </div>
+          <div class="formGroup" style="margin-bottom: 8px;">
+            <label class="formLabel" for="loginPassword" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Password</label>
+            <input type="password" id="loginPassword" class="formInput" placeholder="Enter password" required autocomplete="current-password" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem;">
+          </div>
+          <div class="formExtraRow" style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+            <a href="#" class="forgotLink" id="forgotPasswordLink" style="font-size: 0.8rem; color: var(--navy); text-decoration: underline;">Forgot Password?</a>
+          </div>
+          <button type="submit" class="modalSubmitBtn" style="width: 100%;">
+            <span>Sign In</span>
+          </button>
+        </form>
+
+        <!-- Email Sign Up Form -->
+        <form id="signupForm" class="emailAuthForm" style="display: none;">
+          <div class="formError" id="signupError" style="display: none; color: #dc2626; font-size: 0.82rem; margin-bottom: 8px;"></div>
+          <div class="formGroup" style="margin-bottom: 10px;">
+            <label class="formLabel" for="signupName" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Full Name</label>
+            <input type="text" id="signupName" class="formInput" placeholder="Advocate / Citizen Name" autocomplete="name" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem;">
+          </div>
+          <div class="formGroup" style="margin-bottom: 10px;">
+            <label class="formLabel" for="signupEmail" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Email Address</label>
+            <input type="email" id="signupEmail" class="formInput" placeholder="name@example.com" required autocomplete="email" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem;">
+          </div>
+          <div class="formGroup" style="margin-bottom: 10px;">
+            <label class="formLabel" for="signupPassword" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Password (minimum 6 characters)</label>
+            <input type="password" id="signupPassword" class="formInput" placeholder="Create secure password" required minlength="6" autocomplete="new-password" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem;">
+          </div>
+          <div class="formGroup" style="margin-bottom: 12px;">
+            <label class="formLabel" for="signupConfirmPassword" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Confirm Password</label>
+            <input type="password" id="signupConfirmPassword" class="formInput" placeholder="Confirm secure password" required minlength="6" autocomplete="new-password" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem;">
+          </div>
+          <button type="submit" class="modalSubmitBtn" style="width: 100%;">
+            <span>Create Account</span>
+          </button>
+        </form>
+
+        <div class="authDivider" style="margin-top: 16px;">
           <span>Or Continue Without Account</span>
         </div>
 
@@ -806,7 +891,7 @@
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          <span>Continue as Guest Citizen</span>
+          <span id="continueGuestBtn">Continue as Guest Citizen</span>
         </button>
 
         <div id="devAuthBanner" class="devAuthBanner" style="display: none;">
@@ -882,11 +967,39 @@
     </div>
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <!-- Forgot Password Modal -->
+  <div class="modalBackdrop" id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="forgotModalHeading">
+    <div class="authCard">
+      <div class="authModalHeader">
+        <span class="authModalTitle" id="forgotModalHeading">Password Assistance</span>
+        <button type="button" class="authCloseBtn" id="forgotModalClose" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="authModalBody">
+        <p style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 14px;">
+          For institutional security, password resets on Department of Justice portals require verification through verified administrative credentials or national helplines.
+        </p>
+        <div style="background: var(--lightBg); border-left: 3px solid var(--saffron); padding: 12px; border-radius: var(--radius); font-size: 0.8rem; margin-bottom: 16px;">
+          <strong>Alternative Options:</strong>
+          <ul style="margin: 8px 0 0 18px; line-height: 1.6;">
+            <li>Sign in instantly using <strong>Google Sign-In</strong> with the same email.</li>
+            <li>Continue immediately as a <strong>Guest User</strong> to access all legal inquiry features.</li>
+            <li>Contact NALSA 24×7 Legal Helpline at <strong>15100</strong> for citizen assistance.</li>
+          </ul>
+        </div>
+        <button type="button" class="formSubmitBtn" id="backToLoginBtn" style="width: 100%; padding: 9px; background: var(--navy); color: #fff; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Back to Sign In</button>
+      </div>
+    </div>
+  </div>  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
   <script src="js/chatbot.js"></script>
   <script src="js/interactions.js"></script>
+  <script src="js/chatbot.js"></script>
+  <script src="js/interactions.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/conversations.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/main.js"></script>  <script src="js/main.js"></script>
 </body>
 </html>

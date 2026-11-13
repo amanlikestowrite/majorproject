@@ -6,15 +6,19 @@ class GuestController {
     try {
       const { guestSession, rawToken } = await SessionService.createGuestSession();
 
-      res.clearCookie("nyaya_auth_token", { path: "/" });
-      res.cookie("nyaya_auth_token", "", { path: "/", expires: new Date(0), maxAge: 0 });
+      const cookieOpts = {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        secure: config.nodeEnv === "production",
+      };
+
+      res.clearCookie("nyaya_auth_token", cookieOpts);
+      res.cookie("nyaya_auth_token", "", { ...cookieOpts, expires: new Date(0), maxAge: 0 });
 
       res.cookie("nyaya_guest_token", rawToken, {
-        httpOnly: true,
-        secure: config.nodeEnv === "production",
-        sameSite: "lax",
+        ...cookieOpts,
         maxAge: config.guestSessionTtlHours * 60 * 60 * 1000,
-        path: "/",
       });
 
       return res.status(201).json({

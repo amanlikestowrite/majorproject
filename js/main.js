@@ -501,6 +501,21 @@
   }
   window.renderAssistantResponse = renderAssistantResponse;
   window.resetToNewConversation = resetToNewConversation;
+  window.ChatUI = {
+    init: function () {
+      // Chat events handled cleanly in setupChatEventListeners to avoid duplicate listeners
+    },
+    loadConversations: function () {
+      if (window.ConversationManager) window.ConversationManager.fetchConversations();
+    },
+    startNewChat: function () {
+      resetToNewConversation();
+    },
+    handleDirectQuery: function (text) {
+      scrollToChatbot();
+      handleUserQuery(text);
+    },
+  };
   Object.defineProperty(window, 'activeConversationId', {
     get: () => activeConversationId,
     set: (val) => { activeConversationId = val; },

@@ -62,12 +62,13 @@ app.use("/chatHistory", chatHistoryRouter);
 app.use("/css", express.static(path.join(__dirname, "../css")));
 app.use("/js", express.static(path.join(__dirname, "../js")));
 app.use("/assets", express.static(path.join(__dirname, "../assets")));
+app.use(express.static(path.join(__dirname, "..")));
 
 app.get("/", (req, res) => {
   if (req.accepts("html")) {
     return res.sendFile(path.join(__dirname, "../index.html"));
   }
-  res.status(200).json({
+  return res.status(200).json({
     service: "nyaya-sahayak-express-gateway",
     status: "operational",
     docs: "/api/health",
