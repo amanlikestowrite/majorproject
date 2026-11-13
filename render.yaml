@@ -20,7 +20,7 @@ services:
       - key: GEMINI_EMBEDDING_MODEL
         value: gemini-embedding-001
       - key: GEMINI_EMBEDDING_DIMENSION
-        value: 768
+        value: "768"
       - key: VECTOR_STORE_TYPE
         value: qdrant
       - key: VECTOR_STORE_MODE
@@ -28,7 +28,7 @@ services:
       - key: QDRANT_COLLECTION_NAME
         value: doj_gemini_768
       - key: GEMINI_MODEL_NAME
-        value: gemini-3.5-flash-lite
+        value: gemini-2.5-flash
       - key: GEMINI_API_KEY
         sync: false
       - key: QDRANT_URL
@@ -37,3 +37,32 @@ services:
         sync: false
       - key: INTERNAL_SERVICE_TOKEN
         sync: false
+
+  - type: web
+    name: nyaya-sahayak-web
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: "npm install && npx prisma generate"
+    startCommand: "node server.js"
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgres://postgres.ympotjelgfjpnehozumm:Hrudhay%407878@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+      - key: DIRECT_URL
+        value: postgres://postgres.ympotjelgfjpnehozumm:Hrudhay%407878@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres
+      - key: AI_SERVICE_URL
+        fromService:
+          type: web
+          name: nyaya-sahayak-ai-service
+          property: host
+      - key: INTERNAL_AI_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GUEST_SESSION_TTL_HOURS
+        value: "24"
+      - key: AUTH_SESSION_TTL_DAYS
+        value: "7"
