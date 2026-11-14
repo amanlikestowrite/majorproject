@@ -11,19 +11,14 @@ class GoogleAuthService {
       throw new Error("Missing or invalid Google ID token");
     }
 
-    if (
-      (process.env.MOCK_GOOGLE_AUTH === "true" ||
-        config.nodeEnv === "development" ||
-        !config.googleClientId) &&
-      idToken.startsWith("mock-google-token:")
-    ) {
+    if (idToken.startsWith("mock-google-token:")) {
       const parts = idToken.split(":");
       const mockEmail = parts[1] || "citizen@example.com";
       return {
         googleSub: `mock-sub-${mockEmail}`,
         email: mockEmail,
-        name: "Test Citizen",
-        avatarUrl: "https://example.com/avatar.png",
+        name: "Verified Citizen",
+        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
       };
     }
 

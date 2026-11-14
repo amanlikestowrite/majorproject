@@ -53,6 +53,25 @@ const AuthManager = (function () {
     state.isLoading = true;
     const storedAuthToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     const storedGuestToken = localStorage.getItem(STORAGE_KEYS.GUEST_TOKEN);
+    const storedUserData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
+    const storedGuestData = localStorage.getItem(STORAGE_KEYS.GUEST_DATA);
+
+    // 0. Synchronously restore state from localStorage first so UI doesn't flicker or show logged out
+    if (storedAuthToken && storedUserData) {
+      try {
+        state.sessionType = 'user';
+        state.user = JSON.parse(storedUserData);
+        state.authToken = storedAuthToken;
+        updateNavbarUI();
+      } catch (e) {}
+    } else if (storedGuestToken && storedGuestData) {
+      try {
+        state.sessionType = 'guest';
+        state.guest = JSON.parse(storedGuestData);
+        state.guestToken = storedGuestToken;
+        updateNavbarUI();
+      } catch (e) {}
+    }
 
     // 1. Try restoring authenticated user session only if auth token exists in storage
     if (storedAuthToken) {
@@ -84,13 +103,18 @@ const AuthManager = (function () {
             state.isLoading = false;
             return { type: 'user', user: body.data };
           }
-        } else {
+        } else if (res.status === 401 || res.status === 403) {
           // Token is revoked or invalid on server
           localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
           localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+          localStorage.removeItem(STORAGE_KEYS.SESSION_TYPE);
         }
       } catch (err) {
         console.warn('Authentication check failed or server unreachable:', err.message);
+        if (state.sessionType === 'user' && state.user) {
+          state.isLoading = false;
+          return { type: 'user', user: state.user };
+        }
       }
     }
 
@@ -392,7 +416,7 @@ const AuthManager = (function () {
         window.resetToNewConversation(true);
       }
 
-      const res = await fetch(`${getBaseUrl()}/api/auth/login`, {
+      const res = await fetch(`${getBaseUrl()}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -515,6 +539,9 @@ const AuthManager = (function () {
   function updateNavbarUI() {
     const navGuestBtn = document.getElementById('navGuestBtn');
     const navLoginBtn = document.getElementById('navLoginBtn');
+    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+    const heroGuestBtn = document.getElementById('heroGuestBtn');
+    const heroLoginBtn = document.getElementById('heroLoginBtn');
     const navUserWidget = document.getElementById('navUserWidget');
     const navUserAvatar = document.getElementById('navUserAvatar');
     const navUserName = document.getElementById('navUserName');
@@ -525,6 +552,9 @@ const AuthManager = (function () {
     if (state.sessionType === 'user' && state.user) {
       if (navGuestBtn) navGuestBtn.style.display = 'none';
       if (navLoginBtn) navLoginBtn.style.display = 'none';
+      if (mobileLoginBtn) mobileLoginBtn.style.display = 'none';
+      if (heroGuestBtn) heroGuestBtn.style.display = 'none';
+      if (heroLoginBtn) heroLoginBtn.style.display = 'none';
       navUserWidget.style.display = 'inline-flex';
 
       const initial = (state.user.name || state.user.email || 'U').charAt(0).toUpperCase();
@@ -545,6 +575,9 @@ const AuthManager = (function () {
     } else if (state.sessionType === 'guest' && state.guest) {
       if (navGuestBtn) navGuestBtn.style.display = 'none';
       if (navLoginBtn) navLoginBtn.style.display = 'inline-flex';
+      if (mobileLoginBtn) mobileLoginBtn.style.display = 'inline-flex';
+      if (heroGuestBtn) heroGuestBtn.style.display = 'none';
+      if (heroLoginBtn) heroLoginBtn.style.display = 'inline-flex';
       navUserWidget.style.display = 'inline-flex';
 
       if (navUserAvatar) navUserAvatar.textContent = 'G';
@@ -556,6 +589,9 @@ const AuthManager = (function () {
     } else {
       if (navGuestBtn) navGuestBtn.style.display = 'inline-flex';
       if (navLoginBtn) navLoginBtn.style.display = 'inline-flex';
+      if (mobileLoginBtn) mobileLoginBtn.style.display = 'inline-flex';
+      if (heroGuestBtn) heroGuestBtn.style.display = 'inline-flex';
+      if (heroLoginBtn) heroLoginBtn.style.display = 'inline-flex';
       navUserWidget.style.display = 'none';
     }
   }
@@ -1007,10 +1043,16 @@ const AuthManager = (function () {
     }
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initAuth() {
     AuthModal.initModalListeners();
     checkExistingSession();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuth);
+  } else {
+    initAuth();
+  }
 
   window.AuthModal = AuthModal;
 

@@ -238,14 +238,11 @@ class AuthController {
         },
       });
     } catch (err) {
-      if (err.message && err.message.includes("Google")) {
-        return res.status(401).json({
-          status: "error",
-          code: "GOOGLE_AUTH_FAILED",
-          message: "Failed to verify Google identity credentials.",
-        });
-      }
-      next(err);
+      return res.status(401).json({
+        status: "error",
+        code: "GOOGLE_AUTH_FAILED",
+        message: err.message || "Failed to verify Google identity credentials.",
+      });
     }
   }
 

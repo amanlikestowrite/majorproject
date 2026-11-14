@@ -273,7 +273,7 @@ const ConversationManager = (function () {
       .replace(/'/g, '&#039;');
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initConversations() {
     const toggleBtn = document.getElementById('toggleHistoryBtn');
     const sidebarNewBtn = document.getElementById('sidebarNewChatBtn');
 
@@ -298,7 +298,13 @@ const ConversationManager = (function () {
         fetchConversations();
       }
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initConversations);
+  } else {
+    initConversations();
+  }
 
   function clearState() {
     conversations = [];

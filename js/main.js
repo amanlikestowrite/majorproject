@@ -522,9 +522,15 @@
     set: (val) => { activeConversationId = val; },
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initMain() {
     UIInteractions.setupMobileMenu();
     UIInteractions.setupSmoothScroll();
     setupChatEventListeners();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMain);
+  } else {
+    initMain();
+  }
 })();
