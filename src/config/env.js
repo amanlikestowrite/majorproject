@@ -7,7 +7,7 @@ const config = {
   directUrl: process.env.DIRECT_URL,
   aiServiceUrl: (process.env.AI_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/+$/, ""),
   internalAiSecret: process.env.INTERNAL_AI_SECRET || "",
-  googleClientId: process.env.GOOGLE_CLIENT_ID || "",
+  googleClientId: (process.env.GOOGLE_CLIENT_ID || "").trim(),
   frontendOrigin: process.env.FRONTEND_ORIGIN || "*",
   guestSessionTtlHours: parseInt(process.env.GUEST_SESSION_TTL_HOURS, 10) || 24,
   authSessionTtlDays: parseInt(process.env.AUTH_SESSION_TTL_DAYS, 10) || 7,
