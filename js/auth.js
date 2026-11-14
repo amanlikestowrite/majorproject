@@ -752,12 +752,25 @@ const AuthManager = (function () {
 
         tryRenderGis();
       } else {
-        // No Google Client ID configured in .env yet
+        // No Google Client ID configured in .env yet: Fallback to seamless 1-click Google Demo Citizen login
         if (devBanner) devBanner.style.display = 'block';
         if (fallbackBtn) {
           fallbackBtn.style.display = 'flex';
-          fallbackBtn.addEventListener('click', () => {
-            this.showError('Google Client ID is not configured in .env yet. Click "1-Click Demo Citizen Sign-In" below or "Continue as Guest Citizen".');
+          fallbackBtn.addEventListener('click', async () => {
+            try {
+              fallbackBtn.disabled = true;
+              const textSpan = document.getElementById('googleBtnText') || fallbackBtn;
+              textSpan.textContent = 'Connecting Google Account...';
+              this.clearError();
+              await loginWithGoogle('mock-google-token:citizen@gmail.com');
+              this.close();
+            } catch (err) {
+              this.showError(err.message || 'Google sign in failed.');
+            } finally {
+              fallbackBtn.disabled = false;
+              const textSpan = document.getElementById('googleBtnText');
+              if (textSpan) textSpan.textContent = 'Sign In with Google';
+            }
           });
         }
       }
