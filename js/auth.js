@@ -930,6 +930,12 @@ const AuthManager = (function () {
         });
       }
 
+      function setFormError(el, msg) {
+        if (!el) return;
+        el.textContent = msg;
+        el.style.display = msg ? 'block' : 'none';
+      }
+
       if (loginTabBtn && signupTabBtn) {
         loginTabBtn.addEventListener('click', () => {
           loginTabBtn.classList.add('active');
@@ -938,8 +944,8 @@ const AuthManager = (function () {
           signupTabBtn.style.background = 'var(--white)';
           if (loginForm) loginForm.style.display = 'block';
           if (signupForm) signupForm.style.display = 'none';
-          if (loginError) loginError.textContent = '';
-          if (signupError) signupError.textContent = '';
+          setFormError(loginError, '');
+          setFormError(signupError, '');
         });
         signupTabBtn.addEventListener('click', () => {
           signupTabBtn.classList.add('active');
@@ -948,8 +954,8 @@ const AuthManager = (function () {
           loginTabBtn.style.background = 'var(--white)';
           if (signupForm) signupForm.style.display = 'block';
           if (loginForm) loginForm.style.display = 'none';
-          if (loginError) loginError.textContent = '';
-          if (signupError) signupError.textContent = '';
+          setFormError(loginError, '');
+          setFormError(signupError, '');
         });
       }
 
@@ -961,17 +967,17 @@ const AuthManager = (function () {
           const email = emailInput ? emailInput.value.trim() : '';
           const pass = passInput ? passInput.value : '';
           if (!email || !pass) {
-            if (loginError) loginError.textContent = 'Please enter both email and password.';
+            setFormError(loginError, 'Please enter both email and password.');
             return;
           }
           const submitBtn = loginForm.querySelector('button[type="submit"]');
           try {
             if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Signing In...'; }
-            if (loginError) loginError.textContent = '';
+            setFormError(loginError, '');
             await loginWithPassword(email, pass);
             this.close();
           } catch (err) {
-            if (loginError) loginError.textContent = err.message || 'Login failed.';
+            setFormError(loginError, err.message || 'Login failed. Please verify credentials.');
           } finally {
             if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Sign In with Password'; }
           }
@@ -991,25 +997,40 @@ const AuthManager = (function () {
           const confirm = confirmInput ? confirmInput.value : '';
 
           if (!email || !pass) {
-            if (signupError) signupError.textContent = 'Email and password are required.';
+            setFormError(signupError, 'Email and password are required.');
             return;
           }
           if (pass.length < 6) {
-            if (signupError) signupError.textContent = 'Password must be at least 6 characters.';
+            setFormError(signupError, 'Password must be at least 6 characters.');
             return;
           }
           if (pass !== confirm) {
-            if (signupError) signupError.textContent = 'Passwords do not match.';
+            setFormError(signupError, 'Passwords do not match. Please re-enter.');
             return;
           }
           const submitBtn = signupForm.querySelector('button[type="submit"]');
           try {
             if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creating Account...'; }
-            if (signupError) signupError.textContent = '';
+            setFormError(signupError, '');
             await registerWithPassword(email, pass, name);
             this.close();
           } catch (err) {
-            if (signupError) signupError.textContent = err.message || 'Registration failed.';
+            const msg = err.message || 'Registration failed.';
+            setFormError(signupError, msg);
+            if (msg.toLowerCase().includes('already exists')) {
+              signupError.innerHTML = `${msg} <a href="#" id="switchLoginFromError" style="color:var(--navy);font-weight:700;text-decoration:underline;margin-left:4px;">Sign In here &rarr;</a>`;
+              const switchLink = document.getElementById('switchLoginFromError');
+              if (switchLink && loginTabBtn) {
+                switchLink.addEventListener('click', (ev) => {
+                  ev.preventDefault();
+                  loginTabBtn.click();
+                  const loginEmailInput = document.getElementById('loginEmail');
+                  if (loginEmailInput) loginEmailInput.value = email;
+                  const loginPassInput = document.getElementById('loginPassword');
+                  if (loginPassInput) loginPassInput.focus();
+                });
+              }
+            }
           } finally {
             if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Create Account'; }
           }

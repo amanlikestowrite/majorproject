@@ -30,22 +30,35 @@ class AuthController {
         where: { email: normalizedEmail },
       });
 
+      let user;
       if (existingUser) {
-        return res.status(409).json({
-          status: "error",
-          code: "EMAIL_ALREADY_EXISTS",
-          message: "An account with this email address already exists.",
+        if (!existingUser.passwordHash) {
+          // Account was originally created via Google OAuth; set password and activate account
+          const passwordHash = hashPassword(password);
+          user = await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              passwordHash,
+              name: (name && typeof name === "string" && name.trim()) || existingUser.name,
+            },
+          });
+        } else {
+          return res.status(409).json({
+            status: "error",
+            code: "EMAIL_ALREADY_EXISTS",
+            message: "An account with this email address already exists. Please sign in instead.",
+          });
+        }
+      } else {
+        const passwordHash = hashPassword(password);
+        user = await prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            passwordHash,
+            name: (name && typeof name === "string" && name.trim()) || null,
+          },
         });
       }
-
-      const passwordHash = hashPassword(password);
-      const user = await prisma.user.create({
-        data: {
-          email: normalizedEmail,
-          passwordHash,
-          name: name && typeof name === "string" ? name.trim() : null,
-        },
-      });
 
       const { authSession, rawToken } = await SessionService.createAuthSession(user.id);
 
