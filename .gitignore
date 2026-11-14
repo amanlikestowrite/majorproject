@@ -28,3 +28,4 @@ ai-service/data/vector_store/
 *.sqlite3-journal
 
 
+.vercel
