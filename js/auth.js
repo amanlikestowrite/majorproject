@@ -28,12 +28,10 @@ const AuthManager = (function () {
     if (window.NYAYA_API_BASE_URL) {
       return window.NYAYA_API_BASE_URL.replace(/\/+$/, '');
     }
-    // If served directly by Express gateway on port 3000, use relative paths
-    if (window.location.port === '3000' || window.location.hostname === 'localhost' && window.location.port === '3000') {
-      return '';
+    if (window.location.protocol === 'file:') {
+      return 'http://127.0.0.1:3000';
     }
-    // Otherwise fallback to local gateway port 3000
-    return 'http://127.0.0.1:3000';
+    return '';
   }
 
   function getAuthHeaders() {
