@@ -19,7 +19,8 @@
     typingIndicator: document.getElementById('typingIndicator')
   };
   function findBestKnowledgeMatch(query) {
-    const raw = query.toLowerCase().trim();
+    let raw = query.toLowerCase().trim();
+    raw = raw.replace(/\bposco\b/g, 'pocso').replace(/\bpoosco\b/g, 'pocso');
     const tokens = new Set(raw.match(/[\w\u0900-\u097F]+/g) || []);
     const stopwords = new Set(['how', 'what', 'who', 'where', 'when', 'can', 'the', 'is', 'for', 'about', 'and', 'with', 'my', 'your', 'i', 'do']);
     let bestMatchKey = null;

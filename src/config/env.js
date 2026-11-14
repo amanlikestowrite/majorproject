@@ -6,6 +6,8 @@ const config = {
   databaseUrl: process.env.DATABASE_URL,
   directUrl: process.env.DIRECT_URL,
   aiServiceUrl: (process.env.AI_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/+$/, ""),
+  geminiApiKey: (process.env.GEMINI_API_KEY || "").trim(),
+  useGeminiDirect: process.env.USE_GEMINI_DIRECT === "true" || Boolean(process.env.VERCEL),
   internalAiSecret: process.env.INTERNAL_AI_SECRET || "",
   googleClientId: (process.env.GOOGLE_CLIENT_ID || "").trim(),
   frontendOrigin: process.env.FRONTEND_ORIGIN || "*",

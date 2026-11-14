@@ -269,6 +269,58 @@ const CHATBOT_KNOWLEDGE_BASE = {
       ]
     }
   },
+  pocso_filing: {
+    keys: [
+      'pocso', 'posco', 'file a case against posco', 'how to file a case against posco',
+      'how to file a case against pocso', 'file a case under pocso', 'pocso act',
+      'pocso case', 'child abuse', 'child sexual abuse', 'child protection',
+      'childline 1098', 'special pocso court', 'pocso complaint', 'poosco',
+      'पोक्सो', 'पोस्को', 'पोक्सो केस', 'पोक्सो कानून'
+    ],
+    en: {
+      summary: 'To file a case under the <strong>Protection of Children from Sexual Offences (POCSO) Act, 2012</strong>, reporting the crime immediately to law enforcement or child protection agencies is mandated by law. The Act establishes a child-friendly, confidential judicial process.',
+      steps: [
+        '<strong>1. Immediate Reporting (Section 19):</strong> Report the incident to the <strong>Special Juvenile Police Unit (SJPU)</strong> or local police station. You can also dial the 24/7 National Emergency number <strong>112</strong> or <strong>Childline 1098</strong>.',
+        '<strong>2. Child-Friendly Statement (Section 24):</strong> Statements must be recorded at the child’s residence or preferred location by a woman police officer in plain clothes. The child is never detained at the police station.',
+        '<strong>3. Medical Examination & Care (Section 27):</strong> The child receives sensitive medical examination in the presence of a guardian by a female medical practitioner, followed by appearance before the <strong>Child Welfare Committee (CWC)</strong> within 24 hours.',
+        '<strong>4. Section 164 CrPC Statement:</strong> The Judicial Magistrate records the child’s statement in camera (in private) without the accused being present.',
+        '<strong>5. Free Legal Aid & Special Court Trial:</strong> The child victim is entitled to free legal aid through the District Legal Services Authority (DLSA / NALSA). Trials are conducted in dedicated <strong>Fast Track Special Courts (FTSCs)</strong> within 1 year.'
+      ],
+      important: '<strong>Identity Protection (Section 23 POCSO):</strong> It is strictly prohibited to publish or disclose the name, address, photo, school, or any identifying details of the child victim. Failure to report a POCSO offense is punishable under Section 21.',
+      portal: {
+        title: 'Ministry of Women & Child Development (POCSO Guidance)',
+        url: 'https://wcd.nic.in',
+        domain: 'wcd.nic.in'
+      },
+      source: 'POCSO Act, 2012 & Department of Justice, Govt. of India',
+      followUps: [
+        'How can I get free legal aid from DLSA?',
+        'What is the role of Fast Track Special Courts?',
+        'What is the emergency helpline for children in India?'
+      ]
+    },
+    hi: {
+      summary: '<strong>लैंगिक अपराधों से बालकों का संरक्षण (POCSO) अधिनियम, 2012</strong> के तहत मामला दर्ज करने के लिए तुरंत पुलिस या बाल कल्याण समिति को सूचित करना कानूनी रूप से अनिवार्य है। यह कानून बाल-अनुकूल और पूरी तरह से गोपनीय प्रक्रिया प्रदान करता है।',
+      steps: [
+        '<strong>1. तत्काल रिपोर्टिंग (धारा 19):</strong> विशेष किशोर पुलिस इकाई (SJPU) या नजदीकी थाने में रिपोर्ट करें। 24x7 टोल-फ्री चाइल्डलाइन <strong>1098</strong> या पुलिस <strong>112</strong> पर कॉल करें।',
+        '<strong>2. बाल-अनुकूल बयान (धारा 24):</strong> बच्चे का बयान महिला पुलिस अधिकारी द्वारा सादे कपड़ों में बच्चे के घर या पसंदीदा स्थान पर दर्ज किया जाता है।',
+        '<strong>3. चिकित्सा परीक्षण और सीडब्ल्यूसी (धारा 27):</strong> बच्चे का निःशुल्क चिकित्सा परीक्षण और 24 घंटे में बाल कल्याण समिति (CWC) के समक्ष पेश किया जाता है।',
+        '<strong>4. धारा 164 CrPC के तहत बयान:</strong> न्यायिक मजिस्ट्रेट द्वारा बंद कमरे (इन-कैमरा) में बयान दर्ज किया जाता है।',
+        '<strong>5. फास्ट ट्रैक विशेष पोक्सो कोर्ट:</strong> जिला विधिक सेवा प्राधिकरण (DLSA) द्वारा मुफ्त कानूनी सहायता और 1 वर्ष के भीतर त्वरित सुनवाई।'
+      ],
+      important: '<strong>गोपनीयता की सुरक्षा (धारा 23):</strong> बच्चे की पहचान, नाम, फोटो या पते का किसी भी मीडिया में खुलासा करना पूर्णतः प्रतिबंधित और दंडनीय है।',
+      portal: {
+        title: 'महिला एवं बाल विकास मंत्रालय',
+        url: 'https://wcd.nic.in',
+        domain: 'wcd.nic.in'
+      },
+      source: 'पोक्सो अधिनियम, 2012 एवं न्याय विभाग, भारत सरकार',
+      followUps: [
+        'मुफ्त कानूनी सहायता कैसे प्राप्त करें?',
+        'फास्ट ट्रैक विशेष कोर्ट कैसे काम करते हैं?'
+      ]
+    }
+  },
   fast_track_courts: {
     keys: [
       'fast track', 'ftsc', 'fast track special courts', 'pocso courts', 'rape cases',
